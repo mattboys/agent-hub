@@ -30,7 +30,8 @@ const state = {
   debounce: null,
   loading: false,
   token: 0,
-  outputs: new Map()
+  outputs: new Map(),
+  loadingResetTimer: null
 };
 
 // Verify QRCode library is loaded
@@ -104,9 +105,10 @@ function buildUI() {
   const loadingBanner = document.createElement('div');
   loadingBanner.className = 'qr-loading';
   loadingBanner.innerHTML = `
-    <span class="spinner" aria-hidden="true"></span>
-    <span class="loading-text">Regenerating previews…</span>
-  `;
+      <span class="spinner" aria-hidden="true"></span>
+      <span class="status-icon" aria-hidden="true">✓</span>
+      <span class="loading-text">Regenerating previews…</span>
+    `;
   loadingBanner.hidden = true;
 
   const advanced = buildAdvancedControls();
@@ -280,7 +282,39 @@ function buildUI() {
 
 function setLoading(isLoading) {
   state.loading = isLoading;
-  ui.loadingBanner.hidden = !isLoading;
+  const spinner = ui.loadingBanner.querySelector('.spinner');
+  const statusIcon = ui.loadingBanner.querySelector('.status-icon');
+  const loadingText = ui.loadingBanner.querySelector('.loading-text');
+
+  if (state.loadingResetTimer) {
+    clearTimeout(state.loadingResetTimer);
+    state.loadingResetTimer = null;
+  }
+
+  ui.loadingBanner.hidden = false;
+  ui.loadingBanner.dataset.state = isLoading ? 'pending' : 'ready';
+
+  if (spinner) {
+    spinner.hidden = !isLoading;
+  }
+  if (statusIcon) {
+    statusIcon.hidden = isLoading;
+  }
+  if (loadingText) {
+    loadingText.textContent = isLoading ? 'Regenerating previews…' : 'Previews ready';
+  }
+
+  if (!isLoading) {
+    state.loadingResetTimer = setTimeout(() => {
+      ui.loadingBanner.hidden = true;
+      ui.loadingBanner.dataset.state = 'idle';
+      if (statusIcon) {
+        statusIcon.hidden = true;
+      }
+      state.loadingResetTimer = null;
+    }, 1800);
+  }
+
   ui.previewGrid.dataset.state = isLoading ? 'pending' : 'ready';
 }
 
