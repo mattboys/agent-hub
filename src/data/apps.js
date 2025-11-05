@@ -14,5 +14,13 @@ export const apps = [
       icon: '🧪',
       href: 'apps/clipboard-alchemist/index.html',
       accent: '#5ae4a7'
+    },
+    {
+      slug: 'palette-maker',
+      title: 'Palette Maker',
+      blurb: 'Build harmonious palettes with theory-backed suggestions and accessibility checks.',
+      icon: '🎨',
+      href: 'apps/palette-maker/index.html',
+      accent: '#f6b44e'
     }
 ];

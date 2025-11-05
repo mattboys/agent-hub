@@ -8,7 +8,8 @@ module.exports = defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         clipboard: resolve(__dirname, 'apps/clipboard-alchemist/index.html'),
-        palette: resolve(__dirname, 'apps/vibe-palette/index.html')
+        palette: resolve(__dirname, 'apps/vibe-palette/index.html'),
+        paletteMaker: resolve(__dirname, 'apps/palette-maker/index.html')
       }
     }
   },
