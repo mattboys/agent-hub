@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Space+Grotesk:wght@600&display=swap');
+
+:root {
+  color-scheme: dark light;
+  --bg-gradient: radial-gradient(circle at 10% 20%, rgba(255, 190, 232, 0.4), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(116, 235, 213, 0.35), transparent 40%),
+    #0f1020;
+  --text-primary: #f9f5ff;
+  --text-subtle: rgba(249, 245, 255, 0.72);
+  --card-bg: rgba(15, 16, 32, 0.66);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --blur: blur(24px);
+  --transition: 220ms ease;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  padding: 48px 20px 72px;
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 32px 16px 56px;
+  }
+}
+
+.page-shell {
+  width: min(1080px, 100%);
+  display: grid;
+  gap: 48px;
+}
+
+.hero {
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(249, 245, 255, 0.7);
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2.6rem, 4vw + 1rem, 3.6rem);
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.035em;
+}
+
+.hero p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--text-subtle);
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 28px;
+}
+
+.app-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 12px;
+  padding: 28px 24px;
+  border-radius: 28px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+
+.app-card::before {
+  content: '';
+  position: absolute;
+  inset: -40% -20% 40% -20%;
+  background: radial-gradient(circle at top, color-mix(in srgb, var(--accent) 50%, transparent), transparent 60%);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.app-card:hover,
+.app-card:focus-visible {
+  transform: translateY(-8px);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--card-border));
+  box-shadow: 0 25px 60px -40px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.app-card:hover::before,
+.app-card:focus-visible::before {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+.app-icon {
+  font-size: 2.6rem;
+  display: inline-flex;
+  width: 64px;
+  height: 64px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--accent) 65%, rgba(255, 255, 255, 0.05));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.app-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.app-blurb {
+  color: rgba(249, 245, 255, 0.72);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.app-link {
+  font-weight: 600;
+  color: color-mix(in srgb, var(--accent) 65%, #ffffff);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.about {
+  display: flex;
+  justify-content: center;
+}
+
+.about-card {
+  max-width: 760px;
+  padding: 32px 36px;
+  border-radius: 30px;
+  background: rgba(15, 16, 32, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: var(--blur);
+  display: grid;
+  gap: 16px;
+}
+
+.about-card h2 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.about-card p {
+  margin: 0;
+  color: var(--text-subtle);
+  line-height: 1.6;
+}
+
+.about-card .about-meta {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

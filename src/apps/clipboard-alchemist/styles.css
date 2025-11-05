@@ -1,0 +1,200 @@
+.warning-banner {
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: rgba(255, 107, 129, 0.18);
+  border: 1px solid rgba(255, 107, 129, 0.4);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.clipboard-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 960px) {
+  .clipboard-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.actions-panel,
+.preview-panel {
+  background: rgba(18, 19, 36, 0.82);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: clamp(20px, 3vw, 32px);
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+
+.action-list {
+  display: grid;
+  gap: 18px;
+}
+
+.action-card {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 14, 26, 0.82);
+  display: grid;
+  gap: 12px;
+}
+
+.action-card header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+
+.action-card header p {
+  margin: 6px 0 0 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.action-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 11px 18px;
+  font-weight: 600;
+  background: rgba(90, 228, 167, 0.16);
+  color: inherit;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.action-btn.primary {
+  background: color-mix(in srgb, var(--accent) 45%, rgba(255, 255, 255, 0.18));
+}
+
+.action-btn:hover,
+.action-btn:focus-visible {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--accent) 30%, rgba(255, 255, 255, 0.28));
+  outline: none;
+}
+
+.action-btn.is-busy {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.find-replace-inputs {
+  display: grid;
+  gap: 12px;
+}
+
+.find-replace-inputs label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.find-replace-inputs input {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.24);
+  padding: 10px 12px;
+  color: inherit;
+  font-size: 0.95rem;
+}
+
+.find-replace-inputs input:focus-visible {
+  border-color: rgba(90, 228, 167, 0.5);
+  outline: none;
+}
+
+.status-toast {
+  justify-self: stretch;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.78);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.status-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.status-toast[data-state='error'] {
+  color: #ffb8c3;
+  border-color: rgba(255, 81, 134, 0.45);
+}
+
+.refresh-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.refresh-btn:hover,
+.refresh-btn:focus-visible {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--accent) 25%, rgba(255, 255, 255, 0.18));
+  outline: none;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.preview-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.preview-header p {
+  margin: 6px 0 0 0;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.preview-field {
+  display: grid;
+  gap: 10px;
+}
+
+.preview-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.preview-field textarea {
+  min-height: 140px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 26, 0.7);
+  font-family: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', monospace;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.88);
+  resize: vertical;
+}
+
+.preview-field textarea:focus-visible {
+  outline: none;
+  border-color: rgba(90, 228, 167, 0.5);
+}
