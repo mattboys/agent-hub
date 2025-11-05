@@ -58,6 +58,42 @@ function createAbout() {
   return section;
 }
 
+function createTimeline() {
+  const section = document.createElement('section');
+  section.className = 'timeline';
+  section.innerHTML = `
+      <div class="timeline-card">
+        <h2>Vibes-to-App Timeline</h2>
+        <ol class="timeline-steps">
+          <li>
+            <span class="timeline-duration">30s</span>
+            <span class="timeline-description">
+              User issues a prompt via <a href="https://cursor.com/agents" target="_blank" rel="noopener noreferrer">Cursor Agents</a>
+              or <a href="https://github.com/mattboys/agent-hub/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>.
+            </span>
+          </li>
+          <li>
+            <span class="timeline-duration">60s</span>
+            <span class="timeline-description">AI agents implement the request and open a pull request with the code changes.</span>
+          </li>
+          <li>
+            <span class="timeline-duration">5s</span>
+            <span class="timeline-description">The site admin reviews and approves the update.</span>
+          </li>
+          <li>
+            <span class="timeline-duration">40s</span>
+            <span class="timeline-description">GitHub Actions spins up a fresh VM to rebuild the site.</span>
+          </li>
+        </ol>
+        <p class="timeline-total">
+          <span class="timeline-total-label">Total:</span>
+          2min 15s — changes go live on <a href="https://mattboys.github.io/agent-hub/" target="_blank" rel="noopener noreferrer">GitHub Pages</a>.
+        </p>
+      </div>
+    `;
+  return section;
+}
+
 function init() {
   if (!root) {
     return;
@@ -68,6 +104,7 @@ function init() {
 
   page.appendChild(createHero());
   page.appendChild(createAppGrid());
+  page.appendChild(createTimeline());
   page.appendChild(createAbout());
 
   root.innerHTML = '';
