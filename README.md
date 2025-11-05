@@ -49,3 +49,4 @@ A lightweight, all-static showcase for Matt's growing collection of vibe-coded w
 - Keep the dev server running (`npm run dev`) for instant local previews while editing with Cursor.
 - Use `npm run build` before pushing significant updates to catch bundle-time issues.
 - The project sticks to vanilla JS + CSS, so no extra build steps are needed for agents to modify or extend features.
+
