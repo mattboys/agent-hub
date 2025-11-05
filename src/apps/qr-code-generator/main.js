@@ -33,8 +33,24 @@ const state = {
   outputs: new Map()
 };
 
+// Verify QRCode library is loaded
+console.log('[QR] Initializing QR Code Generator...');
+console.log('[QR] QRCode library loaded:', typeof QRCode !== 'undefined');
+console.log('[QR] QRCode.create available:', typeof QRCode?.create === 'function');
+
 const ui = buildUI();
 body.append(ui.container, ui.previewGrid, ui.status);
+
+// Test QR generation on load
+try {
+  console.log('[QR] Testing QRCode.create with sample data...');
+  const testQR = QRCode.create('test', { errorCorrectionLevel: 'M' });
+  console.log('[QR] Test QR created successfully:', testQR);
+} catch (error) {
+  console.error('[QR] Failed to create test QR code:', error);
+  ui.status.textContent = 'Error: QR Code library failed to load. Please refresh the page.';
+  ui.status.style.color = 'red';
+}
 
 triggerRender();
 
@@ -275,9 +291,22 @@ function triggerRender() {
   }
 
   const token = ++state.token;
+  console.log(`[QR] triggerRender called with token ${token}`);
   setLoading(true);
+  
+  // Add timeout detection
+  const timeoutId = setTimeout(() => {
+    if (state.loading && token === state.token) {
+      console.error('[QR] Generation timeout - operation took longer than 10 seconds');
+      ui.status.textContent = 'QR generation timed out. This may be a browser compatibility issue. Check console for details.';
+      ui.status.style.color = 'orange';
+    }
+  }, 10000);
+  
   generatePreviews(token)
     .then((result) => {
+      clearTimeout(timeoutId);
+      console.log(`[QR] generatePreviews completed for token ${token}:`, result);
       if (token === state.token) {
         setLoading(false);
         if (result?.empty) {
@@ -294,7 +323,9 @@ function triggerRender() {
       }
     })
     .catch((error) => {
-      console.error(error);
+      clearTimeout(timeoutId);
+      console.error('[QR] Error in triggerRender:', error);
+      console.error('[QR] Error stack:', error.stack);
       if (token === state.token) {
         setLoading(false);
         ui.status.textContent = 'Oops, that input is too large for a QR code.';
@@ -304,12 +335,14 @@ function triggerRender() {
 }
 
 async function generatePreviews(token) {
+  console.log(`[QR] generatePreviews called with token ${token}`);
   const text = state.text.trim();
   if (!text) {
     ui.status.textContent = 'Enter text to generate QR codes.';
     clearPreviews();
     return { empty: true, hasErrors: false };
   }
+  console.log(`[QR] Generating previews for text: "${text.substring(0, 50)}..."`);
 
   state.outputs.clear();
   const errors = [];
@@ -324,16 +357,23 @@ async function generatePreviews(token) {
       hint.textContent = `Click to download ${state.format.toUpperCase()}`;
     }
     try {
+      console.log(`[QR] Generating QR code for level ${level.key}...`);
       const qr = QRCode.create(text, {
         errorCorrectionLevel: level.key
       });
+      console.log(`[QR] QR created for level ${level.key}:`, qr);
 
       if (token !== state.token) {
+        console.log(`[QR] Token mismatch for level ${level.key}, aborting`);
         return;
       }
 
+      console.log(`[QR] Rendering to canvas for level ${level.key}...`);
       await renderToCanvas(preview.canvas, qr);
+      console.log(`[QR] Canvas rendered for level ${level.key}`);
+      
       if (token !== state.token) {
+        console.log(`[QR] Token mismatch after canvas for level ${level.key}, aborting`);
         return;
       }
 
@@ -342,12 +382,17 @@ async function generatePreviews(token) {
       preview.stats.version.textContent = metadata.version;
       preview.stats.print.textContent = metadata.printSize;
 
+      console.log(`[QR] Building assets for level ${level.key}...`);
       const assets = await buildAssets(qr, preview.canvas);
+      console.log(`[QR] Assets built for level ${level.key}:`, { hasPng: !!assets.png, hasSvg: !!assets.svg });
+      
       state.outputs.set(level.key, assets);
       preview.card.dataset.ready = 'true';
       preview.card.title = `Download ${state.format.toUpperCase()} (${level.label})`;
+      console.log(`[QR] Successfully completed level ${level.key}`);
     } catch (error) {
-      console.error(error);
+      console.error(`[QR] Error generating QR for level ${level.key}:`, error);
+      console.error(`[QR] Error stack:`, error.stack);
       preview.stats.segments.textContent = 'Err';
       preview.stats.version.textContent = '—';
       preview.stats.print.textContent = '—';
@@ -443,26 +488,58 @@ function extractStats(qr) {
 }
 
 async function buildAssets(qr, canvas) {
-  const [png, svg] = await Promise.all([
-    canvasToBlob(canvas),
-    buildSvgText(qr)
-  ]);
-
-  return {
-    png,
-    svg
-  };
+  console.log('[QR] buildAssets called');
+  try {
+    const [png, svg] = await Promise.all([
+      canvasToBlob(canvas),
+      buildSvgText(qr)
+    ]);
+    console.log('[QR] buildAssets completed:', { hasPng: !!png, svgLength: svg?.length });
+    return {
+      png,
+      svg
+    };
+  } catch (error) {
+    console.error('[QR] Error in buildAssets:', error);
+    throw error;
+  }
 }
 
 function canvasToBlob(canvas) {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) {
-        resolve(blob);
-      } else {
-        reject(new Error('Failed to create PNG blob'));
+    try {
+      // Check if toBlob is supported
+      if (!canvas.toBlob) {
+        console.error('canvas.toBlob is not supported in this browser');
+        // Fallback to dataURL for older browsers
+        try {
+          const dataURL = canvas.toDataURL('image/png');
+          const binaryString = atob(dataURL.split(',')[1]);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const blob = new Blob([bytes], { type: 'image/png' });
+          resolve(blob);
+          return;
+        } catch (fallbackError) {
+          console.error('Fallback to dataURL failed:', fallbackError);
+          reject(new Error('Failed to create PNG blob using fallback'));
+          return;
+        }
       }
-    }, 'image/png');
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to create PNG blob'));
+        }
+      }, 'image/png');
+    } catch (error) {
+      console.error('Error in canvasToBlob:', error);
+      reject(error);
+    }
   });
 }
 
