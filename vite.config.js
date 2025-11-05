@@ -1,8 +1,10 @@
 const { defineConfig } = require('vite');
 const { resolve } = require('path');
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 module.exports = defineConfig({
-  base: './',
+  base: isProduction ? '/agent-hub/' : '/',
   build: {
     rollupOptions: {
       input: {
