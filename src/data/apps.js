@@ -22,5 +22,13 @@ export const apps = [
       icon: '🎨',
       href: 'apps/palette-maker/index.html',
       accent: '#f6b44e'
-    }
+    },
+  {
+    slug: 'qr-code-generator',
+    title: 'Local QR Studio',
+    blurb: 'Type or paste text, preview four redundancy levels, and download pristine PNG or SVG QR codes instantly.',
+    icon: '🔳',
+    href: 'apps/qr-code-generator/index.html',
+    accent: '#64d7ff'
+  }
 ];
