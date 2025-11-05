@@ -19,7 +19,7 @@ export function createAppShell({ title, description, accent, status }) {
   header.className = 'app-header';
 
   const backLink = document.createElement('a');
-  backLink.href = '/';
+  backLink.href = '../../';
   backLink.className = 'back-link';
   backLink.textContent = '← Back to the shelf';
   header.appendChild(backLink);
