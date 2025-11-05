@@ -444,7 +444,7 @@ function extractStats(qr) {
 
 async function buildAssets(qr, canvas) {
   const [png, svg] = await Promise.all([
-    state.format === 'png' ? canvasToBlob(canvas) : Promise.resolve(null),
+    canvasToBlob(canvas),
     buildSvgText(qr)
   ]);
 
