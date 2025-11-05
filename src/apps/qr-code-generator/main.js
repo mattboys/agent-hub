@@ -3,16 +3,31 @@ import './styles.css';
 import QRCode from 'qrcode';
 
 const ECC_LEVELS = [
-  { key: 'L', label: 'Low', blurb: 'Fast scans, ~7% recovery', accent: '#6df6b5' },
-  { key: 'M', label: 'Medium', blurb: 'Balanced, ~15% recovery', accent: '#60ddff' },
-  { key: 'Q', label: 'Quartile', blurb: 'Logo-friendly, ~25% recovery', accent: '#9f8cff' },
-  { key: 'H', label: 'High', blurb: 'Max safety, ~30% recovery', accent: '#ff9adf' }
+  { key: 'L', label: 'Low', blurb: 'Fast scans, ~7% recovery', accent: '#6df6b5', size: 'large' },
+  { key: 'H', label: 'High', blurb: 'Max safety, ~30% recovery', accent: '#ff9adf', size: 'large' },
+  { key: 'Q', label: 'Quartile', blurb: 'Logo-friendly, ~25% recovery', accent: '#9f8cff', size: 'compact' },
+  { key: 'M', label: 'Medium', blurb: 'Balanced, ~15% recovery', accent: '#60ddff', size: 'compact' }
 ];
 
 const QUIET_ZONE_MODULES = 4;
 const DEFAULT_TEXT = 'https://example.com';
-const MODULE_MM = 0.4; // 0.4mm per module is a common print guideline
-const FRAME_CLEAR_RATIO = 0.3;
+
+const PREVIEW_COPY = {
+  segments: 'Segments: 21×21 (total 441)',
+  printSize: 'Recommended minimum print size: 10 mm (1 mm/module)',
+  redundancy: {
+    L: 'Redundancy: 7% (Low)',
+    M: 'Redundancy: 15% (Medium)',
+    Q: 'Redundancy: 25% (Quartile)',
+    H: 'Redundancy: 30% (High)'
+  },
+  application: {
+    L: 'Application: Small printing size',
+    H: 'Application: Overlay a logo',
+    Q: 'Application: Overlay demo logo preview',
+    M: 'Application: Everyday scans'
+  }
+};
 
 const { body } = createAppShell({
   title: 'Local QR Studio',
@@ -26,7 +41,6 @@ const state = {
   format: 'png',
   background: 'transparent',
   pixelsPerModule: 9,
-  frame: false,
   debounce: null,
   loading: false,
   token: 0,
@@ -118,10 +132,18 @@ function buildUI() {
   const previewGrid = document.createElement('div');
   previewGrid.className = 'qr-preview-grid';
 
+  const primaryRow = document.createElement('div');
+  primaryRow.className = 'qr-preview-row qr-preview-row--primary';
+
+  const secondaryRow = document.createElement('div');
+  secondaryRow.className = 'qr-preview-row qr-preview-row--secondary';
+
+  previewGrid.append(primaryRow, secondaryRow);
+
   const previewCards = new Map();
   ECC_LEVELS.forEach((level) => {
     const card = document.createElement('article');
-    card.className = 'qr-preview-card';
+    card.className = `qr-preview-card qr-preview-card--${level.size}`;
     card.tabIndex = 0;
     card.dataset.level = level.key;
     card.style.setProperty('--card-accent', level.accent);
@@ -140,22 +162,33 @@ function buildUI() {
     canvas.setAttribute('role', 'img');
     canvas.setAttribute('aria-label', `${level.label} redundancy QR preview`);
 
-    const stats = document.createElement('dl');
-    stats.className = 'qr-stats';
-    stats.innerHTML = `
-      <div>
-        <dt>Segments</dt>
-        <dd data-stat="segments">–</dd>
-      </div>
-      <div>
-        <dt>Version</dt>
-        <dd data-stat="version">–</dd>
-      </div>
-      <div>
-        <dt>Min print</dt>
-        <dd data-stat="print">–</dd>
-      </div>
-    `;
+    const info = document.createElement('div');
+    info.className = 'qr-info';
+
+    const segmentsLine = document.createElement('p');
+    segmentsLine.className = 'qr-info-line';
+    segmentsLine.textContent = PREVIEW_COPY.segments;
+
+    const applicationLine = document.createElement('p');
+    applicationLine.className = 'qr-info-line';
+    applicationLine.textContent = PREVIEW_COPY.application[level.key] || '';
+
+    const redundancyLine = document.createElement('p');
+    redundancyLine.className = 'qr-info-line';
+    redundancyLine.textContent = PREVIEW_COPY.redundancy[level.key] || '';
+
+    const printLine = document.createElement('p');
+    printLine.className = 'qr-info-line';
+    printLine.textContent = PREVIEW_COPY.printSize;
+
+    info.append(segmentsLine);
+    if (applicationLine.textContent) {
+      info.append(applicationLine);
+    }
+    if (redundancyLine.textContent) {
+      info.append(redundancyLine);
+    }
+    info.append(printLine);
 
     const footer = document.createElement('footer');
     footer.className = 'preview-footer';
@@ -163,8 +196,13 @@ function buildUI() {
       <span class="download-hint">Click to download</span>
     `;
 
-    card.append(header, canvas, stats, footer);
-    previewGrid.append(card);
+    card.append(header, canvas, info, footer);
+
+    if (level.size === 'large') {
+      primaryRow.append(card);
+    } else {
+      secondaryRow.append(card);
+    }
 
     card.addEventListener('click', () => downloadLevel(level.key));
     card.addEventListener('keydown', (event) => {
@@ -177,11 +215,8 @@ function buildUI() {
     previewCards.set(level.key, {
       card,
       canvas,
-      stats: {
-        segments: stats.querySelector('[data-stat="segments"]'),
-        version: stats.querySelector('[data-stat="version"]'),
-        print: stats.querySelector('[data-stat="print"]')
-      }
+      info,
+      downloadHint: footer.querySelector('.download-hint')
     });
   });
 
@@ -258,24 +293,7 @@ function buildUI() {
       }, 220);
     });
 
-    const frameField = document.createElement('label');
-    frameField.className = 'qr-field toggle-field';
-    frameField.innerHTML = `
-      <span class="field-label">Frame version</span>
-      <label class="switch">
-        <input type="checkbox" />
-        <span class="track"></span>
-      </label>
-      <p class="field-hint">Reserve a centred window for logos. Combines best with Quartile or High redundancy.</p>
-    `;
-
-    const frameToggle = frameField.querySelector('input[type="checkbox"]');
-    frameToggle.addEventListener('change', (event) => {
-      state.frame = event.target.checked;
-      triggerRender();
-    });
-
-    details.append(summary, backgroundField, pixelField, frameField);
+    details.append(summary, backgroundField, pixelField);
     return details;
   }
 }
@@ -386,7 +404,7 @@ async function generatePreviews(token) {
     if (!preview) return;
 
     preview.card.classList.add('is-working');
-    const hint = preview.card.querySelector('.download-hint');
+    const hint = preview.downloadHint;
     if (hint) {
       hint.textContent = `Click to download ${state.format.toUpperCase()}`;
     }
@@ -403,7 +421,7 @@ async function generatePreviews(token) {
       }
 
       console.log(`[QR] Rendering to canvas for level ${level.key}...`);
-      await renderToCanvas(preview.canvas, qr);
+      await renderToCanvas(preview.canvas, qr, { overlayLogo: level.key === 'Q' });
       console.log(`[QR] Canvas rendered for level ${level.key}`);
       
       if (token !== state.token) {
@@ -411,13 +429,8 @@ async function generatePreviews(token) {
         return;
       }
 
-      const metadata = extractStats(qr);
-      preview.stats.segments.textContent = metadata.segments;
-      preview.stats.version.textContent = metadata.version;
-      preview.stats.print.textContent = metadata.printSize;
-
       console.log(`[QR] Building assets for level ${level.key}...`);
-      const assets = await buildAssets(qr, preview.canvas);
+      const assets = await buildAssets(qr);
       console.log(`[QR] Assets built for level ${level.key}:`, { hasPng: !!assets.png, hasSvg: !!assets.svg });
       
       state.outputs.set(level.key, assets);
@@ -427,9 +440,6 @@ async function generatePreviews(token) {
     } catch (error) {
       console.error(`[QR] Error generating QR for level ${level.key}:`, error);
       console.error(`[QR] Error stack:`, error.stack);
-      preview.stats.segments.textContent = 'Err';
-      preview.stats.version.textContent = '—';
-      preview.stats.print.textContent = '—';
       preview.card.dataset.ready = 'false';
       if (hint) {
         hint.textContent = 'Input too long for this tier';
@@ -449,14 +459,15 @@ function clearPreviews() {
   state.outputs.clear();
   ui.previewCards.forEach((preview) => {
     preview.canvas.getContext('2d')?.clearRect(0, 0, preview.canvas.width, preview.canvas.height);
-    preview.stats.segments.textContent = '—';
-    preview.stats.version.textContent = '—';
-    preview.stats.print.textContent = '—';
     preview.card.dataset.ready = 'false';
+    if (preview.downloadHint) {
+      preview.downloadHint.textContent = 'Click to download';
+    }
   });
 }
 
-async function renderToCanvas(canvas, qr) {
+async function renderToCanvas(canvas, qr, options = {}) {
+  const { overlayLogo = false } = options;
   const matrix = qr.modules;
   const moduleCount = matrix.size;
   const margin = QUIET_ZONE_MODULES;
@@ -489,43 +500,45 @@ async function renderToCanvas(canvas, qr) {
     }
   }
 
-  if (state.frame) {
-    const frameSize = Math.max(6, Math.floor(moduleCount * FRAME_CLEAR_RATIO));
-    const start = Math.floor((moduleCount - frameSize) / 2);
-    const px = (start + margin) * scale;
-    const dimension = frameSize * scale;
-    ctx.fillStyle = state.background === 'transparent' ? 'rgba(255, 255, 255, 0.92)' : '#ffffff';
-    ctx.fillRect(px, px, dimension, dimension);
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
-    ctx.lineWidth = Math.max(1, Math.round(scale / 2));
-    ctx.strokeRect(px + ctx.lineWidth / 2, px + ctx.lineWidth / 2, dimension - ctx.lineWidth, dimension - ctx.lineWidth);
+  if (overlayLogo) {
+    drawPreviewLogo(ctx, { moduleCount, margin, scale });
   }
 
   return canvas;
 }
 
-function extractStats(qr) {
-  const moduleCount = qr.modules.size;
-  const segments = qr.segments || [];
-  const segmentSummary = segments.length
-    ? `${segments.length} (${segments.map((seg) => seg.mode?.id || 'Byte').join(', ')})`
-    : '1 (Byte)';
-  const totalModules = moduleCount + QUIET_ZONE_MODULES * 2;
-  const minPrint = Math.round((totalModules * MODULE_MM + (state.frame ? 1.5 : 0)) * 10) / 10;
-  const versionLabel = `v${qr.version} (${moduleCount} modules)`;
+function drawPreviewLogo(ctx, { moduleCount, margin, scale }) {
+  const maxLogoModules = Math.floor(moduleCount * 0.3);
+  const computedModules = Math.floor(moduleCount * 0.28);
+  const logoModules = Math.max(4, Math.min(maxLogoModules, computedModules));
+  const radius = (logoModules * scale) / 2;
+  const center = margin * scale + (moduleCount * scale) / 2;
 
-  return {
-    segments: segmentSummary,
-    version: versionLabel,
-    printSize: `${minPrint} mm`
-  };
+  ctx.save();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
+  ctx.lineWidth = Math.max(1, Math.round(scale * 0.9));
+  ctx.beginPath();
+  ctx.arc(center, center, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(20, 32, 52, 0.85)';
+  ctx.font = `600 ${Math.max(14, Math.round(radius * 0.9))}px "Inter", "Segoe UI", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('LOGO', center, center);
+
+  ctx.restore();
 }
 
-async function buildAssets(qr, canvas) {
+async function buildAssets(qr) {
   console.log('[QR] buildAssets called');
   try {
+    const offscreenCanvas = document.createElement('canvas');
+    await renderToCanvas(offscreenCanvas, qr, { overlayLogo: false });
     const [png, svg] = await Promise.all([
-      canvasToBlob(canvas),
+      canvasToBlob(offscreenCanvas),
       buildSvgText(qr)
     ]);
     console.log('[QR] buildAssets completed:', { hasPng: !!png, svgLength: svg?.length });
@@ -595,26 +608,14 @@ async function buildSvgText(qr) {
 
   const pathData = parts.join('');
   const hasBackground = state.background === 'white';
-  const frameElements = state.frame ? buildFrameElements(moduleCount, margin) : '';
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges">
   ${hasBackground ? `<rect width="${size}" height="${size}" fill="#fff" />` : ''}
   <path d="${pathData}" fill="#0b0c10" />
-  ${frameElements}
 </svg>`;
 
   return svg;
-}
-
-function buildFrameElements(moduleCount, margin) {
-  const frameSize = Math.max(6, Math.floor(moduleCount * FRAME_CLEAR_RATIO));
-  const start = Math.floor((moduleCount - frameSize) / 2) + margin;
-  const fill = state.background === 'transparent' ? '#ffffff' : '#ffffff';
-  const opacity = state.background === 'transparent' ? ' fill-opacity="0.92"' : '';
-  const borderOpacity = state.background === 'transparent' ? ' stroke-opacity="0.38"' : ' stroke-opacity="0.22"';
-  return `<rect x="${start}" y="${start}" width="${frameSize}" height="${frameSize}" fill="${fill}"${opacity} rx="1" />
-  <rect x="${start}" y="${start}" width="${frameSize}" height="${frameSize}" fill="none" stroke="#222" stroke-width="0.35"${borderOpacity}></rect>`;
 }
 
 function downloadLevel(levelKey) {
