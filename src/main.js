@@ -9,7 +9,7 @@ function createHero() {
   hero.innerHTML = `
     <span class="hero-eyebrow">Matt Presents</span>
     <h1>Vibe-Coded App Hub</h1>
-    <p>Micro web experiments with big feelings. Tap an icon to open a focused tool in a new page.</p>
+    <p>Micro web experiments with big feelings. Click any card to open a focused tool in a new page.</p>
   `;
   return hero;
 }
@@ -32,7 +32,7 @@ function createAppCard(app) {
 function createAppGrid() {
   const section = document.createElement('section');
   section.className = 'app-grid';
-  section.setAttribute('aria-label', 'App selection');
+  section.setAttribute('aria-label', 'Available vibe-coded applications');
   apps.forEach((app) => {
     section.appendChild(createAppCard(app));
   });
@@ -50,9 +50,9 @@ function createAbout() {
         Each tool runs entirely in your browser—no accounts, no tracking, just playful utility.
       </p>
       <p>
-        Updates ship through an automated Vite build. That means tweaks land fast: edit with Cursor AI Agents, run a build, push to GitHub, and Pages handles the rest.
+        Built with AI assistance and deployed automatically. When ideas are submitted, AI agents write the code, and updates go live within minutes.
       </p>
-      <p class="about-meta">Stay tuned as new vibe-coded experiments appear here over time.</p>
+      <p class="about-meta">New experiments launch regularly—check back often or submit your own idea!</p>
     </div>
   `;
   return section;
@@ -63,12 +63,12 @@ function createTimeline() {
   section.className = 'timeline';
   section.innerHTML = `
       <div class="timeline-card">
-        <h2>Vibes-to-App Timeline</h2>
+        <h2>From Idea to Live App</h2>
         <ol class="timeline-steps">
           <li>
             <span class="timeline-duration">30s</span>
             <span class="timeline-description">
-              User issues a prompt via <a href="https://cursor.com/agents" target="_blank" rel="noopener noreferrer">Cursor Agents</a>
+              User submits an idea via <a href="https://cursor.com/agents" target="_blank" rel="noopener noreferrer">Cursor Agents</a>
               or <a href="https://github.com/mattboys/agent-hub/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>.
             </span>
           </li>
