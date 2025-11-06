@@ -1,4 +1,4 @@
-# Matt's Vibe-Coded App Shelf
+# Matt's Vibe-Coded App Hub
 
 A lightweight, all-static showcase for Matt's growing collection of vibe-coded web experiments. Each app is its own page, built with Vite and vanilla JavaScript so everything runs directly in the browser—perfect for GitHub Pages hosting.
 
