@@ -4,8 +4,8 @@ import QRCode from 'qrcode';
 
 const ECC_LEVELS = [
   { key: 'L', label: 'Low', blurb: 'Fast scans, ~7% recovery', accent: '#6df6b5', size: 'large' },
-  { key: 'H', label: 'High', blurb: 'Max safety, ~30% recovery', accent: '#ff9adf', size: 'large' },
-  { key: 'Q', label: 'Quartile', blurb: 'Logo-friendly, ~25% recovery', accent: '#9f8cff', size: 'compact' },
+  { key: 'H', label: 'High', blurb: 'Logo overlay preview, ~30% recovery', accent: '#ff9adf', size: 'large' },
+  { key: 'Q', label: 'Quartile', blurb: 'Brand safe, ~25% recovery', accent: '#9f8cff', size: 'compact' },
   { key: 'M', label: 'Medium', blurb: 'Balanced, ~15% recovery', accent: '#60ddff', size: 'compact' }
 ];
 
@@ -13,8 +13,6 @@ const QUIET_ZONE_MODULES = 4;
 const DEFAULT_TEXT = 'https://example.com';
 
 const PREVIEW_COPY = {
-  segments: 'Segments: 21×21 (total 441)',
-  printSize: 'Recommended minimum print size: 10 mm (1 mm/module)',
   redundancy: {
     L: 'Redundancy: 7% (Low)',
     M: 'Redundancy: 15% (Medium)',
@@ -23,8 +21,8 @@ const PREVIEW_COPY = {
   },
   application: {
     L: 'Application: Small printing size',
-    H: 'Application: Overlay a logo',
-    Q: 'Application: Overlay demo logo preview',
+    H: 'Application: Demo logo overlay preview',
+    Q: 'Application: Brand-safe without overlay',
     M: 'Application: Everyday scans'
   }
 };
@@ -138,7 +136,20 @@ function buildUI() {
   const secondaryRow = document.createElement('div');
   secondaryRow.className = 'qr-preview-row qr-preview-row--secondary';
 
-  previewGrid.append(primaryRow, secondaryRow);
+  const moreOptions = document.createElement('details');
+  moreOptions.className = 'qr-more-options';
+
+  const moreSummary = document.createElement('summary');
+  moreSummary.className = 'qr-more-summary';
+  moreSummary.textContent = 'More options';
+
+  const moreContent = document.createElement('div');
+  moreContent.className = 'qr-more-content';
+  moreContent.append(secondaryRow);
+
+  moreOptions.append(moreSummary, moreContent);
+
+  previewGrid.append(primaryRow, moreOptions);
 
   const previewCards = new Map();
   ECC_LEVELS.forEach((level) => {
@@ -165,30 +176,17 @@ function buildUI() {
     const info = document.createElement('div');
     info.className = 'qr-info';
 
-    const segmentsLine = document.createElement('p');
-    segmentsLine.className = 'qr-info-line';
-    segmentsLine.textContent = PREVIEW_COPY.segments;
+    const segmentsRow = createInfoRow('Segments');
+    const applicationRow = createInfoRow(
+      'Application',
+      PREVIEW_COPY.application[level.key] || '—'
+    );
+    const redundancyRow = createInfoRow(
+      'Redundancy',
+      PREVIEW_COPY.redundancy[level.key] || '—'
+    );
 
-    const applicationLine = document.createElement('p');
-    applicationLine.className = 'qr-info-line';
-    applicationLine.textContent = PREVIEW_COPY.application[level.key] || '';
-
-    const redundancyLine = document.createElement('p');
-    redundancyLine.className = 'qr-info-line';
-    redundancyLine.textContent = PREVIEW_COPY.redundancy[level.key] || '';
-
-    const printLine = document.createElement('p');
-    printLine.className = 'qr-info-line';
-    printLine.textContent = PREVIEW_COPY.printSize;
-
-    info.append(segmentsLine);
-    if (applicationLine.textContent) {
-      info.append(applicationLine);
-    }
-    if (redundancyLine.textContent) {
-      info.append(redundancyLine);
-    }
-    info.append(printLine);
+    info.append(segmentsRow.row, applicationRow.row, redundancyRow.row);
 
     const footer = document.createElement('footer');
     footer.className = 'preview-footer';
@@ -216,6 +214,11 @@ function buildUI() {
       card,
       canvas,
       info,
+      infoRows: {
+        segments: segmentsRow.value,
+        application: applicationRow.value,
+        redundancy: redundancyRow.value
+      },
       downloadHint: footer.querySelector('.download-hint')
     });
   });
@@ -235,6 +238,23 @@ function buildUI() {
     previewGrid.querySelectorAll('.download-hint').forEach((hint) => {
       hint.textContent = `Click to download ${state.format.toUpperCase()}`;
     });
+  }
+
+  function createInfoRow(label, initialValue = '—') {
+    const row = document.createElement('div');
+    row.className = 'qr-info-row';
+
+    const key = document.createElement('span');
+    key.className = 'qr-info-key';
+    key.textContent = label;
+
+    const value = document.createElement('span');
+    value.className = 'qr-info-value';
+    value.textContent = initialValue;
+
+    row.append(key, value);
+
+    return { row, value };
   }
 
   function buildAdvancedControls() {
@@ -408,6 +428,7 @@ async function generatePreviews(token) {
     if (hint) {
       hint.textContent = `Click to download ${state.format.toUpperCase()}`;
     }
+
     try {
       console.log(`[QR] Generating QR code for level ${level.key}...`);
       const qr = QRCode.create(text, {
@@ -421,18 +442,20 @@ async function generatePreviews(token) {
       }
 
       console.log(`[QR] Rendering to canvas for level ${level.key}...`);
-      await renderToCanvas(preview.canvas, qr, { overlayLogo: level.key === 'Q' });
+      await renderToCanvas(preview.canvas, qr, { overlayLogo: level.key === 'H' });
       console.log(`[QR] Canvas rendered for level ${level.key}`);
-      
+
       if (token !== state.token) {
         console.log(`[QR] Token mismatch after canvas for level ${level.key}, aborting`);
         return;
       }
 
+      updatePreviewInfo(preview, level.key, qr);
+
       console.log(`[QR] Building assets for level ${level.key}...`);
       const assets = await buildAssets(qr);
       console.log(`[QR] Assets built for level ${level.key}:`, { hasPng: !!assets.png, hasSvg: !!assets.svg });
-      
+
       state.outputs.set(level.key, assets);
       preview.card.dataset.ready = 'true';
       preview.card.title = `Download ${state.format.toUpperCase()} (${level.label})`;
@@ -443,6 +466,9 @@ async function generatePreviews(token) {
       preview.card.dataset.ready = 'false';
       if (hint) {
         hint.textContent = 'Input too long for this tier';
+      }
+      if (preview.infoRows) {
+        preview.infoRows.segments.textContent = '—';
       }
       errors.push(error);
     } finally {
@@ -457,11 +483,18 @@ async function generatePreviews(token) {
 
 function clearPreviews() {
   state.outputs.clear();
-  ui.previewCards.forEach((preview) => {
-    preview.canvas.getContext('2d')?.clearRect(0, 0, preview.canvas.width, preview.canvas.height);
+  ui.previewCards.forEach((preview, levelKey) => {
+    preview.canvas
+      .getContext('2d')
+      ?.clearRect(0, 0, preview.canvas.width, preview.canvas.height);
     preview.card.dataset.ready = 'false';
     if (preview.downloadHint) {
       preview.downloadHint.textContent = 'Click to download';
+    }
+    if (preview.infoRows) {
+      preview.infoRows.segments.textContent = '—';
+      preview.infoRows.application.textContent = PREVIEW_COPY.application[levelKey] || '—';
+      preview.infoRows.redundancy.textContent = PREVIEW_COPY.redundancy[levelKey] || '—';
     }
   });
 }
@@ -616,6 +649,25 @@ async function buildSvgText(qr) {
 </svg>`;
 
   return svg;
+}
+
+function updatePreviewInfo(preview, levelKey, qr) {
+  if (!preview?.infoRows) {
+    return;
+  }
+
+  const fallback = '—';
+  const moduleCount = qr?.modules?.size;
+
+  if (typeof moduleCount === 'number' && Number.isFinite(moduleCount)) {
+    const total = moduleCount * moduleCount;
+    preview.infoRows.segments.textContent = `${moduleCount} × ${moduleCount} (${total.toLocaleString()} total modules)`;
+  } else {
+    preview.infoRows.segments.textContent = fallback;
+  }
+
+  preview.infoRows.application.textContent = PREVIEW_COPY.application[levelKey] || fallback;
+  preview.infoRows.redundancy.textContent = PREVIEW_COPY.redundancy[levelKey] || fallback;
 }
 
 function downloadLevel(levelKey) {
