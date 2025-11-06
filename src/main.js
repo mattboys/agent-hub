@@ -8,7 +8,7 @@ function createHero() {
   hero.className = 'hero';
   hero.innerHTML = `
     <span class="hero-eyebrow">Matt Presents</span>
-    <h1>Vibe-Coded App Shelf</h1>
+    <h1>Vibe-Coded App Hub</h1>
     <p>Micro web experiments with big feelings. Tap an icon to open a focused tool in a new page.</p>
   `;
   return hero;
@@ -46,7 +46,7 @@ function createAbout() {
     <div class="about-card">
       <h2>What is this place?</h2>
       <p>
-        This shelf is a living collection of pocket-sized webapps built by Matt and delivered via GitHub Pages.
+        This hub is a living collection of pocket-sized webapps built by Matt and delivered via GitHub Pages.
         Each tool runs entirely in your browser—no accounts, no tracking, just playful utility.
       </p>
       <p>

@@ -21,7 +21,7 @@ export function createAppShell({ title, description, accent, status }) {
   const backLink = document.createElement('a');
   backLink.href = '../../';
   backLink.className = 'back-link';
-  backLink.textContent = '← Back to the shelf';
+  backLink.textContent = '← Back to the hub';
   header.appendChild(backLink);
 
   const h1 = document.createElement('h1');
