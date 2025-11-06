@@ -4,9 +4,9 @@ import './styles.css';
 const accent = '#b7410e';
 
 const { body } = createAppShell({
-  title: 'Rust Systems Diagnostic',
+  title: 'Browser Systems Diagnostic',
   description:
-    'Spin up a deliberate, rust-hued sweep of browser capabilities, permissions, and experimental APIs. Hit start and watch each probe resolve in sequence.',
+    'Spin up a deliberate, cinematic sweep of browser capabilities, permissions, and experimental APIs. Hit start and watch each probe resolve in sequence.',
   accent,
   status: 'beta'
 });
@@ -652,7 +652,7 @@ const tests = [
     label: 'Check localStorage functionality',
     run: () => {
       try {
-        const key = `rust-test-${Date.now()}`;
+        const key = `diagnostic-test-${Date.now()}`;
         localStorage.setItem(key, 'ok');
         localStorage.removeItem(key);
         return { message: 'localStorage read/write succeeded' };
@@ -666,7 +666,7 @@ const tests = [
     label: 'Check sessionStorage functionality',
     run: () => {
       try {
-        const key = `rust-test-${Date.now()}`;
+        const key = `diagnostic-test-${Date.now()}`;
         sessionStorage.setItem(key, 'ok');
         sessionStorage.removeItem(key);
         return { message: 'sessionStorage read/write succeeded' };

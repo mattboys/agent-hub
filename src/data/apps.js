@@ -32,11 +32,11 @@ export const apps = [
       accent: '#64d7ff'
     },
     {
-      slug: 'rust-browser-diagnostic',
-      title: 'Rust Systems Diagnostic',
-      blurb: 'Run a slow, deliberate sweep of browser features, permissions, and experimental APIs, all from a rust-hued command console.',
+      slug: 'browser-diagnostic',
+      title: 'Browser Systems Diagnostic',
+      blurb: 'Run a slow, deliberate sweep of browser features, permissions, and experimental APIs from a glowing command console.',
       icon: '🧰',
-      href: 'apps/rust-browser-diagnostic/index.html',
+      href: 'apps/browser-diagnostic/index.html',
       accent: '#b7410e'
     }
 ];
