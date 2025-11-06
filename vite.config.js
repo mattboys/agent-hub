@@ -10,7 +10,8 @@ module.exports = defineConfig({
         clipboard: resolve(__dirname, 'apps/clipboard-alchemist/index.html'),
         palette: resolve(__dirname, 'apps/vibe-palette/index.html'),
         paletteMaker: resolve(__dirname, 'apps/palette-maker/index.html'),
-        qr: resolve(__dirname, 'apps/qr-code-generator/index.html')
+        qr: resolve(__dirname, 'apps/qr-code-generator/index.html'),
+        rustDiagnostic: resolve(__dirname, 'apps/rust-browser-diagnostic/index.html')
       }
     }
   },
