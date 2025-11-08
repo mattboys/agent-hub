@@ -1,5 +1,13 @@
 export const apps = [
     {
+      slug: 'roman-numeral-translator',
+      title: 'Roman Numeral Translator',
+      blurb: 'Convert roman numerals to numbers (and back) with instant validation and history.',
+      icon: '🏛️',
+      href: 'apps/roman-numeral-translator/index.html',
+      accent: '#f08c4a'
+    },
+    {
       slug: 'vibe-palette',
       title: 'Aura Gradient Mixer',
       blurb: 'Blend colors into dreamy gradients and copy CSS-ready code in a snap.',
