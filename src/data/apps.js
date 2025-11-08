@@ -1,5 +1,13 @@
 export const apps = [
     {
+      slug: 'quick-diff',
+      title: 'Quick Diff',
+      blurb: 'Line up two snippets and spot the precise character changes with inline highlights for insertions and deletions.',
+      icon: '📝',
+      href: 'apps/quick-diff/index.html',
+      accent: '#3a86ff'
+    },
+    {
       slug: 'reverse-engineering-lab',
       title: 'Protocol Decoder Lab',
       blurb: 'Paste unknown data blobs to detect encodings, decode bytes, and identify common protocols automatically.',
