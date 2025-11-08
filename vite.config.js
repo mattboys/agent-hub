@@ -11,7 +11,8 @@ module.exports = defineConfig({
         palette: resolve(__dirname, 'apps/vibe-palette/index.html'),
         paletteMaker: resolve(__dirname, 'apps/palette-maker/index.html'),
         qr: resolve(__dirname, 'apps/qr-code-generator/index.html'),
-        browserDiagnostic: resolve(__dirname, 'apps/browser-diagnostic/index.html')
+        browserDiagnostic: resolve(__dirname, 'apps/browser-diagnostic/index.html'),
+        romanNumeralTranslator: resolve(__dirname, 'apps/roman-numeral-translator/index.html')
       }
     }
   },
