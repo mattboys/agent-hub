@@ -1,5 +1,13 @@
 export const apps = [
     {
+      slug: 'reverse-engineering-lab',
+      title: 'Protocol Decoder Lab',
+      blurb: 'Paste unknown data blobs to detect encodings, decode bytes, and identify common protocols automatically.',
+      icon: '🕵️',
+      href: 'apps/reverse-engineering-lab/index.html',
+      accent: '#9d4edd'
+    },
+    {
       slug: 'roman-numeral-translator',
       title: 'Roman Numeral Translator',
       blurb: 'Convert roman numerals to numbers (and back) with instant validation and history.',
