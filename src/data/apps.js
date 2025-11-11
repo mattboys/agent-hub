@@ -1,5 +1,13 @@
 export const apps = [
     {
+      slug: 'clean-url-tracker-remover',
+      title: 'Clean URL Trimmer',
+      blurb: 'Paste a sharing link and drop all the ad trackers, redirect junk, and campaign tags in one click.',
+      icon: '🧼',
+      href: 'apps/clean-url-tracker-remover/index.html',
+      accent: '#48cae4'
+    },
+    {
       slug: 'quick-diff',
       title: 'Quick Diff',
       blurb: 'Line up two snippets and spot the precise character changes with inline highlights for insertions and deletions.',
