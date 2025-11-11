@@ -455,7 +455,8 @@ const TRACKER_EXACT = new Set(
     'hsCtaTracking',
     'ml_subscriber',
     'ml_subscriber_hash',
-    'rb_clickid'
+    'rb_clickid',
+    'gad_campaignid'
   ].map((key) => key.toLowerCase())
 );
 
@@ -475,10 +476,11 @@ const TRACKER_PREFIXES = [
   'vero_',
   'aff_',
   'sscid',
-  'rb_'
+  'rb_',
+  'gad_'
 ];
 
-const TRACKER_SUFFIXES = ['_cid', '_source', '_medium', '_campaign', '_term', '_content', '_id', '_name'];
+const TRACKER_SUFFIXES = ['_cid', '_source', '_medium', '_campaign', '_term', '_content', '_id', '_name', '_campaignid'];
 
 const TRACKER_REGEX = [
   /^utm[\w-]*$/,
