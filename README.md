@@ -45,6 +45,8 @@ A lightweight, all-static showcase for Matt's growing collection of vibe-coded w
 4. Update `vite.config.js` to include the new HTML entry in `rollupOptions.input`.
 5. Run `npm run dev` to verify and commit the changes.
 
+> ⚠️ Reminder for Cursor agents: GitHub Pages only publishes the HTML files listed in `rollupOptions.input`. If a new app 404s after deploy, double-check that its `apps/<slug>/index.html` path is present in `vite.config.js`.
+
 ## 🧰 Working with Cursor AI Agents
 - Keep the dev server running (`npm run dev`) for instant local previews while editing with Cursor.
 - Use `npm run build` before pushing significant updates to catch bundle-time issues.
