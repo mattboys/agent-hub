@@ -2,23 +2,22 @@ name: PR Preview Build
 
 on:
   pull_request:
-    branches:
-      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages-preview-${{ github.ref }}
+concurrency: 
+  group: preview-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  build:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  deploy-preview:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -29,22 +28,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
       - name: Install dependencies
         run: npm ci
 
       - name: Build static site
-        run: npm run build -- --outDir website
+        run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy PR Preview
+        uses: rossjrw/pr-preview-action@v1
         with:
-          path: website
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          preview: true
+          source-dir: ./dist
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
