@@ -11,6 +11,12 @@ const base = prNumber
   ? `/agent-hub/pr-preview/pr-${prNumber}/`
   : '/agent-hub/';
 
+if (process.env.GITHUB_ACTIONS) {
+  console.log('PR preview build detected.');
+  console.log('PR_NUMBER:', prNumber ?? '(not set)');
+  console.log('Building with base:', base);
+}
+
 module.exports = defineConfig({
   base: process.env.GITHUB_ACTIONS ? base : './',
   build: {
