@@ -277,8 +277,10 @@
 }
 
 .removal-item {
-  display: grid;
-  gap: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 14px 16px;
   border-radius: 18px;
   background: rgba(0, 0, 0, 0.24);
@@ -286,9 +288,17 @@
   font-size: 0.92rem;
 }
 
+.removal-content {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
 .removal-key {
   font-weight: 600;
   letter-spacing: 0.02em;
+  word-break: break-word;
 }
 
 .removal-location {
@@ -306,6 +316,31 @@
   font-size: 0.82rem;
   letter-spacing: 0.01em;
   color: rgba(255, 255, 255, 0.85);
+  word-break: break-all;
+}
+
+.restore-button {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.restore-button:hover,
+.restore-button:focus-visible {
+  outline: none;
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 75%, rgba(255, 255, 255, 0.18));
+  background: rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 640px) {

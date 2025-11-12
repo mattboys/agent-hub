@@ -7,7 +7,7 @@ const AUTO_CLEAN_DELAY = 220;
 const { body } = createAppShell({
   title: 'Clean URL Trimmer',
   description:
-    'Drop in a messy sharing link and instantly strip out ad trackers, campaign tags, and redirect cruft to get the trustworthy version you actually wanted.',
+    'Drop in a URL and instantly strip out all query parameters (everything after the ?) to get a clean link.',
   accent: ACCENT
 });
 
@@ -21,8 +21,8 @@ const inputHeader = document.createElement('header');
 inputHeader.className = 'url-card-header';
 inputHeader.innerHTML = `
   <div>
-    <h2>Messy link</h2>
-    <p>Paste a full URL. We will keep the meaningful parts and remove known trackers automatically.</p>
+    <h2>Original URL</h2>
+    <p>Paste a URL and we'll remove all query parameters automatically.</p>
   </div>
 `;
 
@@ -49,9 +49,12 @@ cleanButton.classList.add('primary');
 const copyButton = createActionButton('Copy clean URL');
 copyButton.disabled = true;
 
+const openButton = createActionButton('Open in new tab');
+openButton.disabled = true;
+
 const clearButton = createActionButton('Clear');
 
-actions.append(cleanButton, copyButton, clearButton);
+actions.append(cleanButton, copyButton, openButton, clearButton);
 
 inputCard.append(inputHeader, inputField, inputFooter, actions);
 
@@ -64,7 +67,7 @@ outputHeader.className = 'url-card-header';
 outputHeader.innerHTML = `
   <div>
     <h2>Clean result</h2>
-    <p>Tracking parameters and redirect fluff are stripped from the link below.</p>
+    <p>All query parameters are stripped from the link below.</p>
   </div>
   <span class="status-chip" data-role="status-chip">Waiting…</span>
 `;
@@ -80,7 +83,7 @@ outputMeta.className = 'url-meta';
 outputMeta.innerHTML = `
   <div class="meta-row">
     <strong>Removed:</strong>
-    <span data-role="removed-count">0 trackers</span>
+    <span data-role="removed-count">0 parameters</span>
   </div>
   <div class="meta-row" data-role="protocol-note" hidden></div>
 `;
@@ -91,7 +94,7 @@ const removalSummary = document.createElement('section');
 removalSummary.className = 'removal-summary';
 removalSummary.dataset.state = 'empty';
 removalSummary.innerHTML = `
-  <h3>Tracker breakdown</h3>
+  <h3>Removed parameters</h3>
   <p class="empty-hint">Removed parameters will be listed here once we find any.</p>
   <ul class="removal-list" data-role="removal-list"></ul>
 `;
@@ -137,14 +140,23 @@ copyButton.addEventListener('click', async () => {
   }
 });
 
+openButton.addEventListener('click', () => {
+  if (!state.lastResult || state.lastResult.status !== 'clean') {
+    return;
+  }
+  const urlToOpen = state.lastResult.fullCleanedUrl || state.lastResult.cleanedUrl;
+  window.open(urlToOpen, '_blank');
+});
+
 clearButton.addEventListener('click', () => {
   inputField.value = '';
   outputField.value = '';
   copyButton.disabled = true;
+  openButton.disabled = true;
   protocolNote.hidden = true;
   removalList.innerHTML = '';
   removalSummary.dataset.state = 'empty';
-  removedCountEl.textContent = '0 trackers';
+  removedCountEl.textContent = '0 parameters';
   statusChip.textContent = 'Waiting…';
   statusChip.dataset.state = 'idle';
   outputCard.dataset.state = 'idle';
@@ -180,9 +192,10 @@ function renderResult(result) {
     statusChip.textContent = 'Waiting…';
     outputField.value = '';
     copyButton.disabled = true;
+    openButton.disabled = true;
     removalSummary.dataset.state = 'empty';
     removalList.innerHTML = '';
-    removedCountEl.textContent = '0 trackers';
+    removedCountEl.textContent = '0 parameters';
     protocolNote.hidden = true;
     protocolNote.textContent = '';
     return;
@@ -194,9 +207,10 @@ function renderResult(result) {
     statusChip.textContent = 'Not a valid URL';
     outputField.value = '';
     copyButton.disabled = true;
+    openButton.disabled = true;
     removalSummary.dataset.state = 'empty';
     removalList.innerHTML = '';
-    removedCountEl.textContent = '0 trackers';
+    removedCountEl.textContent = '0 parameters';
     protocolNote.hidden = true;
     protocolNote.textContent = '';
     return;
@@ -204,10 +218,11 @@ function renderResult(result) {
 
   outputCard.dataset.state = result.removed.length ? 'changed' : 'clean';
   statusChip.dataset.state = result.removed.length ? 'changed' : 'clean';
-  statusChip.textContent = result.removed.length ? 'Trackers removed' : 'Already clean';
+  statusChip.textContent = result.removed.length ? 'Parameters removed' : 'Already clean';
 
   outputField.value = result.cleanedUrl;
   copyButton.disabled = !result.cleanedUrl;
+  openButton.disabled = !result.cleanedUrl;
 
   if (result.protocolNote) {
     protocolNote.hidden = false;
@@ -218,7 +233,7 @@ function renderResult(result) {
   }
 
   const totalRemoved = result.removed.length;
-  removedCountEl.textContent = totalRemoved === 1 ? '1 tracker' : `${totalRemoved} trackers`;
+  removedCountEl.textContent = totalRemoved === 1 ? '1 parameter' : `${totalRemoved} parameters`;
 
   if (!totalRemoved) {
     removalSummary.dataset.state = 'empty';
@@ -234,11 +249,24 @@ function renderRemovalList(target, removedItems) {
   removedItems.forEach((item) => {
     const entry = document.createElement('li');
     entry.className = 'removal-item';
-    entry.innerHTML = `
-      <span class="removal-key">${item.key}</span>
-      <span class="removal-location">${item.location}</span>
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'removal-content';
+    contentDiv.innerHTML = `
+      <span class="removal-key">${escapeHtml(item.key)}</span>
       ${item.value ? `<code class="removal-value">${escapeHtml(item.value)}</code>` : ''}
     `;
+    
+    const restoreButton = document.createElement('button');
+    restoreButton.type = 'button';
+    restoreButton.className = 'restore-button';
+    restoreButton.textContent = 'Restore';
+    restoreButton.addEventListener('click', () => {
+      restoreParameter(item);
+    });
+    
+    entry.appendChild(contentDiv);
+    entry.appendChild(restoreButton);
     target.appendChild(entry);
   });
 }
@@ -277,10 +305,7 @@ function cleanUrl(rawInput) {
   }
 
   const removed = [];
-  removeQueryTrackers(parsed, removed);
-  const { hash, removed: fragmentRemoved } = cleanHash(parsed.hash);
-  parsed.hash = hash;
-  removed.push(...fragmentRemoved);
+  removeAllQueryParams(parsed, removed);
 
   const canonicalHref = parsed.toString();
   const cleanedHref = normaliseForDisplay(canonicalHref, prepared);
@@ -295,6 +320,7 @@ function cleanUrl(rawInput) {
   return {
     status: 'clean',
     cleanedUrl: cleanedHref,
+    fullCleanedUrl: canonicalHref,
     removed,
     protocolNote: protocolNote || null
   };
@@ -332,91 +358,32 @@ function normaliseForDisplay(href, prepared) {
   return href;
 }
 
-function removeQueryTrackers(url, removed) {
+function removeAllQueryParams(url, removed) {
   const params = url.searchParams;
   const initialEntries = Array.from(params.entries());
   initialEntries.forEach(([key, value]) => {
-    if (isTrackerParam(key, value)) {
-      params.delete(key);
-      removed.push({
-        location: 'query',
-        key,
-        value
-      });
-    }
+    params.delete(key);
+    removed.push({
+      key,
+      value
+    });
   });
 }
 
-function cleanHash(hash) {
-  if (!hash || hash.length <= 1) {
-    return { hash, removed: [] };
+
+function restoreParameter(item) {
+  if (!state.lastResult || state.lastResult.status !== 'clean') {
+    return;
   }
-
-  const raw = hash.slice(1);
-  if (!raw.includes('=')) {
-    return { hash, removed: [] };
-  }
-
-  const segments = raw.split('&');
-  const kept = [];
-  const removed = [];
-
-  segments.forEach((segment) => {
-    const [rawKey, rawValue = ''] = segment.split('=');
-    if (!rawKey) {
-      return;
-    }
-    const key = decodeURIComponentSafe(rawKey);
-    const value = decodeURIComponentSafe(rawValue);
-
-    if (isTrackerParam(key, value)) {
-      removed.push({
-        location: 'fragment',
-        key,
-        value
-      });
-      return;
-    }
-    kept.push(segment);
-  });
-
-  const cleanHashValue = kept.length ? `#${kept.join('&')}` : '';
-  return { hash: cleanHashValue, removed };
-}
-
-function isTrackerParam(key, value) {
-  if (!key) return false;
-  const lowerKey = key.toLowerCase();
-
-  if (TRACKER_EXACT.has(lowerKey)) {
-    return true;
-  }
-
-  if (TRACKER_PREFIXES.some((prefix) => lowerKey.startsWith(prefix))) {
-    return true;
-  }
-
-  if (TRACKER_SUFFIXES.some((suffix) => lowerKey.endsWith(suffix))) {
-    return true;
-  }
-
-  if (TRACKER_REGEX.some((pattern) => pattern.test(lowerKey))) {
-    return true;
-  }
-
-  if (value && TRACKER_VALUE_REGEX.some((pattern) => pattern.test(value))) {
-    return true;
-  }
-
-  return false;
-}
-
-function decodeURIComponentSafe(value) {
-  try {
-    return decodeURIComponent(value.replace(/\+/g, '%20'));
-  } catch {
-    return value;
-  }
+  
+  const currentCleanUrl = state.lastResult.fullCleanedUrl || state.lastResult.cleanedUrl;
+  const url = new URL(currentCleanUrl.startsWith('http') ? currentCleanUrl : `https://${currentCleanUrl}`);
+  url.searchParams.set(item.key, item.value);
+  
+  const newUrl = normaliseForDisplay(url.toString(), { addedPrefix: state.lastResult.protocolNote ? 'https://' : '' });
+  
+  inputField.value = newUrl;
+  runClean({ force: true });
 }
 
 function escapeHtml(value) {
@@ -427,79 +394,3 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
-
-const TRACKER_EXACT = new Set(
-  [
-    'fbclid',
-    'gclid',
-    'gbraid',
-    'wbraid',
-    'dclid',
-    'msclkid',
-    'ttclid',
-    'twclid',
-    'yclid',
-    'igshid',
-    'mc_cid',
-    'mc_eid',
-    'mkt_tok',
-    'oly_anon_id',
-    'oly_enc_id',
-    'vero_conv',
-    'vero_id',
-    's_cid',
-    'trackingid',
-    'ref_src',
-    'ref_url',
-    'zanpid',
-    'hsCtaTracking',
-    'ml_subscriber',
-    'ml_subscriber_hash',
-    'rb_clickid',
-    'gad_campaignid'
-  ].map((key) => key.toLowerCase())
-);
-
-const TRACKER_PREFIXES = [
-  'utm_',
-  '_utm',
-  'mtm_',
-  'pk_',
-  'mc_',
-  'mkt_',
-  'oly_',
-  'hsa_',
-  'ga_',
-  'fb_',
-  '_hs',
-  '__hs',
-  'vero_',
-  'aff_',
-  'sscid',
-  'rb_',
-  'gad_'
-];
-
-const TRACKER_SUFFIXES = ['_cid', '_source', '_medium', '_campaign', '_term', '_content', '_id', '_name', '_campaignid'];
-
-const TRACKER_REGEX = [
-  /^utm[\w-]*$/,
-  /^pk_campaign/,
-  /^pk_kwd/,
-  /^ga_session/,
-  /^ga_measurement/,
-  /^ga_client/,
-  /^yclid$/,
-  /^icnclid$/,
-  /^campid$/,
-  /^zanpid$/,
-  /^s?cid$/,
-  /^aff(id|iliate)?$/,
-  /^affiliate(id)?$/,
-  /^hsa_/,
-  /^hs(?:enc|mi|first)/,
-  /^vero_/,
-  /^rb_/
-];
-
-const TRACKER_VALUE_REGEX = [/^t\.me\//i];
