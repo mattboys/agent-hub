@@ -32,7 +32,10 @@ jobs:
         run: npm ci
 
       - name: Build site
-        run: npm run build
+        run: |
+          # Ensure no PR_NUMBER is set so vite uses '/agent-hub/' base
+          unset PR_NUMBER
+          npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

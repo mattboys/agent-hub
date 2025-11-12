@@ -17,8 +17,10 @@ permissions:
   pull-requests: write
 
 jobs:
-  deploy-preview:
+  build-and-deploy:
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,16 +29,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build static site
-        run: npm run build
+        run: |
+          export PR_NUMBER=${{ github.event.pull_request.number }}
+          npm run build
 
       - name: Deploy PR Preview
         uses: rossjrw/pr-preview-action@v1
         with:
-          source-dir: ./dist
+          source-dir: dist
           preview-branch: gh-pages
-          umbrella-dir: pr-preview
+
+  cleanup-preview:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete PR preview
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          preview-branch: gh-pages
+          action: delete

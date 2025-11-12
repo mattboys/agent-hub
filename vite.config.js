@@ -1,8 +1,18 @@
 const { defineConfig } = require('vite');
 const { resolve } = require('path');
 
+const prNumber = process.env.PR_NUMBER;
+
+// Base URL configuration:
+// - Local dev: './'
+// - Main site (main branch): '/agent-hub/'
+// - PR preview: '/agent-hub/pr-preview/pr-<number>/'
+const base = prNumber
+  ? `/agent-hub/pr-preview/pr-${prNumber}/`
+  : '/agent-hub/';
+
 module.exports = defineConfig({
-  base: './',
+  base: process.env.GITHUB_ACTIONS ? base : './',
   build: {
     rollupOptions: {
       input: {
