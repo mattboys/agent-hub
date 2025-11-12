@@ -25,7 +25,8 @@ module.exports = defineConfig({
         browserDiagnostic: resolve(__dirname, 'apps/browser-diagnostic/index.html'),
         romanNumeralTranslator: resolve(__dirname, 'apps/roman-numeral-translator/index.html'),
         reverseEngineeringLab: resolve(__dirname, 'apps/reverse-engineering-lab/index.html'),
-        quickDiff: resolve(__dirname, 'apps/quick-diff/index.html')
+        quickDiff: resolve(__dirname, 'apps/quick-diff/index.html'),
+        nestingAlgorithmVisualizer: resolve(__dirname, 'apps/nesting-algorithm-visualizer/index.html')
       }
     }
   },

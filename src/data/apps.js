@@ -70,5 +70,13 @@ export const apps = [
       icon: '🧰',
       href: 'apps/browser-diagnostic/index.html',
       accent: '#b7410e'
+    },
+    {
+      slug: 'nesting-algorithm-visualizer',
+      title: 'Nesting Algorithm Lab',
+      blurb: 'Watch convex polygons pack themselves into a sheet using fast heuristics, then tweak parameters and rerun instantly.',
+      icon: '🧩',
+      href: 'apps/nesting-algorithm-visualizer/index.html',
+      accent: '#ff6f61'
     }
 ];
