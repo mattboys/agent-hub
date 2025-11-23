@@ -2,19 +2,35 @@ import { createAppShell } from '../shared/appShell.js';
 import './styles.css';
 
 const ACCENT = '#ff6f61';
-const CANVAS_WIDTH = 960;
-const CANVAS_HEIGHT = 620;
-const MAX_SHAPES = 24;
+const MIN_RECTANGLES = 3;
+const MAX_RECTANGLES = 42;
+const MIN_CANVAS_SIZE = 320;
+const MAX_CANVAS_SIZE = 1800;
+const MIN_RECT_SIZE = 20;
+const ANIMATION_STEP_MS = 240;
+
+const algorithmChoices = [
+  { value: 'bottom-left', label: 'Bottom-left skyline' },
+  { value: 'shelf', label: 'Shelf (next fit)' },
+  { value: 'binary-tree', label: 'Binary split' }
+];
+
+const heuristicChoices = [
+  { value: 'area-desc', label: 'Largest area first' },
+  { value: 'height-desc', label: 'Tallest first' },
+  { value: 'width-desc', label: 'Widest first' },
+  { value: 'input-order', label: 'Creation order' }
+];
 
 const { body } = createAppShell({
   title: 'Nesting Algorithm Lab',
   description:
-    'Generate convex polygons, then watch a bottom-left skyline heuristic with rotation search pack them onto the sheet. Adjust parameters or add new shapes and the solver reruns instantly.',
+    'Play with rectangle nesting strategies, constrain the sheet, and watch each packing approach animate its placements step-by-step.',
   accent: ACCENT
 });
 
 const state = {
-  shapes: [],
+  rectangles: [],
   placements: [],
   failed: [],
   stats: {
@@ -24,25 +40,34 @@ const state = {
     placedArea: 0
   },
   config: {
-    shapeCount: 9,
-    maxSides: 8,
-    maxRadius: 110,
-    translationStep: 6,
-    rotationStep: 15,
-    padding: 24,
-    allowRotation: true,
-    autoRerun: true
+    rectangleCount: 10,
+    minWidth: 60,
+    maxWidth: 220,
+    minHeight: 40,
+    maxHeight: 160,
+    padding: 18,
+    canvasWidth: 960,
+    canvasHeight: 540,
+    gridSize: 24,
+    snapToGrid: false,
+    autoRerun: true,
+    algorithm: algorithmChoices[0].value,
+    heuristic: heuristicChoices[0].value,
+    animationSpeed: ANIMATION_STEP_MS
   },
   colorIndex: 0,
-  rerunToken: 0
+  nextLabel: 1,
+  rerunToken: 0,
+  animation: null,
+  ui: null
 };
 
 const ui = buildInterface();
 state.ui = ui;
 
 registerEventHandlers();
-generatePopulation(state.config.shapeCount);
-queueSolve('initialise');
+seedRectangles(state.config.rectangleCount);
+queueSolve('initialise', { immediate: true });
 
 function buildInterface() {
   const lab = document.createElement('div');
@@ -55,13 +80,9 @@ function buildInterface() {
   controlsHeader.className = 'controls-header';
   controlsHeader.innerHTML = `
     <h2>Controls</h2>
-    <p>Alter constraints and rerun to compare layouts. Adding or removing a polygon triggers a fresh solve.</p>
+    <p>Generate rectangles, tune the sheet, and compare different packing and ordering heuristics.</p>
   `;
   controls.appendChild(controlsHeader);
-
-  const controlList = document.createElement('div');
-  controlList.className = 'control-list';
-  controls.appendChild(controlList);
 
   const summary = document.createElement('section');
   summary.className = 'solve-summary';
@@ -92,166 +113,185 @@ function buildInterface() {
   `;
   controls.appendChild(summary);
 
-  const actions = document.createElement('div');
-  actions.className = 'control-actions';
-  controlList.appendChild(actions);
+  const controlList = document.createElement('div');
+  controlList.className = 'control-list';
+  controls.appendChild(controlList);
 
-  const canvasWrapper = document.createElement('section');
-  canvasWrapper.className = 'canvas-panel';
-
-  const canvasHeader = document.createElement('header');
-  canvasHeader.className = 'canvas-header';
-  canvasHeader.innerHTML = `
-    <h2>Sheet simulation</h2>
-    <p>Polygons are coloured by generation order. Hover to inspect IDs.</p>
-  `;
-  canvasWrapper.appendChild(canvasHeader);
-
-  const canvas = document.createElement('canvas');
-  canvas.className = 'nesting-canvas';
-  setupHiDPICanvas(canvas, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-  const canvasOverlay = document.createElement('div');
-  canvasOverlay.className = 'canvas-overlay';
-
-  const overlayList = document.createElement('ul');
-  overlayList.className = 'overlay-list';
-  canvasOverlay.appendChild(overlayList);
-
-  canvasWrapper.append(canvas, canvasOverlay);
-
-  lab.append(controls, canvasWrapper);
-  body.appendChild(lab);
-
-  const controlElements = {
-    shapeCount: createRangeControl('Shape count', {
-      min: 3,
-      max: MAX_SHAPES,
+  const sliders = {
+    rectangleCount: createRangeControl('Rectangles per run', {
+      min: MIN_RECTANGLES,
+      max: MAX_RECTANGLES,
       step: 1,
-      value: state.config.shapeCount,
-      hint: 'Number of polygons generated per run.'
+      value: state.config.rectangleCount,
+      hint: 'How many rectangles to keep in the pool.'
     }),
-    maxSides: createRangeControl('Max sides per polygon', {
-      min: 3,
-      max: 10,
-      step: 1,
-      value: state.config.maxSides,
-      hint: 'Upper bound on random convex polygon complexity.'
+    minWidth: createRangeControl('Minimum width (px)', {
+      min: MIN_RECT_SIZE,
+      max: 400,
+      step: 4,
+      value: state.config.minWidth,
+      hint: 'Lower bound for random rectangle width.'
     }),
-    size: createRangeControl('Polygon radius (px)', {
-      min: 30,
-      max: 140,
-      step: 5,
-      value: state.config.maxRadius,
-      hint: 'Average distance from centre to vertex. Larger shapes make fitting harder.'
+    maxWidth: createRangeControl('Maximum width (px)', {
+      min: 40,
+      max: 420,
+      step: 4,
+      value: state.config.maxWidth,
+      hint: 'Upper bound for random rectangle width.'
     }),
-    translationStep: createRangeControl('Translation step (px)', {
-      min: 2,
-      max: 30,
-      step: 1,
-      value: state.config.translationStep,
-      hint: 'Grid spacing for searching possible placements.'
+    minHeight: createRangeControl('Minimum height (px)', {
+      min: MIN_RECT_SIZE,
+      max: 360,
+      step: 4,
+      value: state.config.minHeight,
+      hint: 'Lower bound for random rectangle height.'
     }),
-    rotationStep: createRangeControl('Rotation step (°)', {
-      min: 0,
-      max: 45,
-      step: 5,
-      value: state.config.rotationStep,
-      hint: 'Angle increment for orientation search. Set to 0 for no rotation.'
+    maxHeight: createRangeControl('Maximum height (px)', {
+      min: 40,
+      max: 400,
+      step: 4,
+      value: state.config.maxHeight,
+      hint: 'Upper bound for random rectangle height.'
     }),
     padding: createRangeControl('Sheet padding (px)', {
       min: 0,
-      max: 80,
+      max: 120,
       step: 2,
       value: state.config.padding,
-      hint: 'Mandatory margin between polygons and sheet edges.'
+      hint: 'Keep rectangles away from the sheet edge.'
+    }),
+    gridSize: createRangeControl('Grid size (px)', {
+      min: 8,
+      max: 120,
+      step: 4,
+      value: state.config.gridSize,
+      hint: 'Spacing for snap-to-grid placements.'
     })
   };
 
-  actions.append(
-    controlElements.shapeCount.group,
-    controlElements.maxSides.group,
-    controlElements.size.group,
-    controlElements.translationStep.group,
-    controlElements.rotationStep.group,
-    controlElements.padding.group
+  const rangeWrapper = document.createElement('div');
+  rangeWrapper.className = 'control-actions';
+  rangeWrapper.append(
+    sliders.rectangleCount.group,
+    sliders.minWidth.group,
+    sliders.maxWidth.group,
+    sliders.minHeight.group,
+    sliders.maxHeight.group,
+    sliders.padding.group,
+    sliders.gridSize.group
   );
+  controlList.appendChild(rangeWrapper);
+
+  const selectors = {
+    algorithm: createSelectControl('Packing algorithm', algorithmChoices, state.config.algorithm),
+    heuristic: createSelectControl('Rectangle ordering', heuristicChoices, state.config.heuristic)
+  };
+
+  const selectorGrid = document.createElement('div');
+  selectorGrid.className = 'packing-controls';
+  selectorGrid.append(selectors.algorithm.group, selectors.heuristic.group);
+  controlList.appendChild(selectorGrid);
+
+  const canvasSettings = document.createElement('div');
+  canvasSettings.className = 'canvas-settings';
+  const numberInputs = {
+    canvasWidth: createNumberControl('Canvas width (px)', {
+      min: MIN_CANVAS_SIZE,
+      max: MAX_CANVAS_SIZE,
+      value: state.config.canvasWidth
+    }),
+    canvasHeight: createNumberControl('Canvas height (px)', {
+      min: MIN_CANVAS_SIZE,
+      max: MAX_CANVAS_SIZE,
+      value: state.config.canvasHeight
+    })
+  };
+  canvasSettings.append(numberInputs.canvasWidth.group, numberInputs.canvasHeight.group);
+  controlList.appendChild(canvasSettings);
 
   const toggleList = document.createElement('div');
   toggleList.className = 'toggle-list';
-
-  const rotationToggle = createCheckboxControl('Allow rotation search', state.config.allowRotation, (checked) => {
-    state.config.allowRotation = checked;
-    queueSolve('rotation-toggle');
-  });
-
-  const autoplayToggle = createCheckboxControl('Auto rerun on adjustments', state.config.autoRerun, (checked) => {
-    state.config.autoRerun = checked;
-  });
-
-  toggleList.append(rotationToggle.group, autoplayToggle.group);
+  const toggles = {
+    snapToGrid: createCheckboxControl('Snap everything to the grid', state.config.snapToGrid, (checked) => {
+      state.config.snapToGrid = checked;
+      sliders.gridSize.input.disabled = !checked;
+      resnapRectangles();
+      queueSolve('snap-toggle', { immediate: true });
+    }),
+    autoRerun: createCheckboxControl('Auto rerun on adjustments', state.config.autoRerun, (checked) => {
+      state.config.autoRerun = checked;
+    })
+  };
+  toggleList.append(toggles.snapToGrid.group, toggles.autoRerun.group);
   controlList.appendChild(toggleList);
 
   const buttonBar = document.createElement('div');
   buttonBar.className = 'button-bar';
-
-  const regenerateButton = createButton('Regenerate shapes', ACCENT, () => {
-    regeneratePopulation();
-  });
-  const rerunButton = createButton('Rerun solver', '#334155', () => {
-    queueSolve('manual-rerun', { immediate: true });
-  });
-  const addButton = createButton('Add shape', '#22c55e', () => {
-    addShape();
-  });
-  const removeButton = createButton('Remove shape', '#ef4444', () => {
-    removeShape();
-  });
-
-  buttonBar.append(regenerateButton, rerunButton, addButton, removeButton);
+  const buttons = {
+    regenerate: createButton('Regenerate rectangles', ACCENT, () => regenerateRectangles()),
+    rerun: createButton('Rerun solver', '#334155', () => queueSolve('manual-rerun', { immediate: true })),
+    remove: createButton('Remove last rectangle', '#ef4444', () => {
+      removeRectangle();
+    })
+  };
+  buttonBar.append(buttons.regenerate, buttons.rerun, buttons.remove);
   controlList.appendChild(buttonBar);
+
+  const addRectPanel = createAddRectanglePanel();
+  controlList.appendChild(addRectPanel.form);
+
+  const inventoryPanel = document.createElement('section');
+  inventoryPanel.className = 'inventory-panel';
+  inventoryPanel.innerHTML = `
+    <header>
+      <h3>Rectangle roster</h3>
+      <p>Use colour + label to find each rectangle on the canvas.</p>
+    </header>
+    <ul class="inventory-list"></ul>
+  `;
+  const inventoryList = inventoryPanel.querySelector('.inventory-list');
+  controls.appendChild(inventoryPanel);
+
+  const canvasPanel = document.createElement('section');
+  canvasPanel.className = 'canvas-panel';
+  const canvasHeader = document.createElement('header');
+  canvasHeader.className = 'canvas-header';
+  canvasHeader.innerHTML = `
+    <h2>Sheet simulation</h2>
+    <p>Every solve animates through its placements so you can compare heuristics visually.</p>
+  `;
+  canvasPanel.appendChild(canvasHeader);
+
+  const canvasViewport = document.createElement('div');
+  canvasViewport.className = 'canvas-viewport';
+  const canvas = document.createElement('canvas');
+  canvas.className = 'nesting-canvas';
+  canvasViewport.appendChild(canvas);
+  setupHiDPICanvas(canvas, state.config.canvasWidth, state.config.canvasHeight);
+  canvasPanel.appendChild(canvasViewport);
 
   const failureList = document.createElement('ul');
   failureList.className = 'failure-list';
-  canvasWrapper.appendChild(failureList);
+  canvasPanel.appendChild(failureList);
 
-  for (const key of Object.keys(controlElements)) {
-    const control = controlElements[key];
-    control.input.addEventListener('input', () => {
-      const value = parseInt(control.input.value, 10);
-      control.output.textContent = control.input.value;
-      if (key === 'shapeCount') {
-        adjustShapeCount(value);
-      } else if (key === 'maxSides') {
-        state.config.maxSides = value;
-        if (state.config.autoRerun) {
-          regeneratePopulation();
-        }
-      } else if (key === 'size') {
-        state.config.maxRadius = value;
-        if (state.config.autoRerun) {
-          regeneratePopulation();
-        }
-      } else if (key === 'translationStep') {
-        state.config.translationStep = value;
-        queueSolve('translation-step');
-      } else if (key === 'rotationStep') {
-        state.config.rotationStep = value;
-        queueSolve('rotation-step');
-      } else if (key === 'padding') {
-        state.config.padding = value;
-        queueSolve('padding-step');
-      }
-    });
-  }
+  lab.append(controls, canvasPanel);
+  body.appendChild(lab);
+
+  sliders.gridSize.input.disabled = !state.config.snapToGrid;
+
+  wireRangeControls(sliders);
+  wireSelectorControls(selectors);
+  wireNumberControls(numberInputs);
+  wireAddRectanglePanel(addRectPanel);
 
   return {
     lab,
     controls,
     canvas,
     ctx: canvas.getContext('2d'),
-    overlayList,
+    inventoryList,
     failureList,
+    addRectPanel,
     summaryFields: {
       placed: summary.querySelector('[data-field="placed"]'),
       failed: summary.querySelector('[data-field="failed"]'),
@@ -259,73 +299,197 @@ function buildInterface() {
       attempts: summary.querySelector('[data-field="attempts"]'),
       runtime: summary.querySelector('[data-field="runtime"]')
     },
-    sliders: controlElements,
-    buttons: {
-      regenerateButton,
-      rerunButton,
-      addButton,
-      removeButton
-    }
+    sliders,
+    buttons,
+    toggles,
+    selectors,
+    numberInputs
   };
 }
 
 function registerEventHandlers() {
   window.addEventListener('resize', () => {
-    setupHiDPICanvas(state.ui.canvas, CANVAS_WIDTH, CANVAS_HEIGHT);
+    setupHiDPICanvas(state.ui.canvas, state.config.canvasWidth, state.config.canvasHeight);
     draw();
   });
 }
 
-function adjustShapeCount(target) {
-  target = Math.max(3, Math.min(MAX_SHAPES, target));
-  state.config.shapeCount = target;
-  const current = state.shapes.length;
-  if (target > current) {
-    for (let i = current; i < target; i += 1) {
-      state.shapes.push(createShape());
+function wireRangeControls(sliders) {
+  Object.entries(sliders).forEach(([key, control]) => {
+    control.input.addEventListener('input', () => {
+      const value = parseInt(control.input.value, 10);
+      control.output.textContent = control.input.value;
+      if (key === 'rectangleCount') {
+        adjustRectangleCount(value);
+        return;
+      }
+      if (key === 'padding') {
+        state.config.padding = value;
+        queueSolve('padding-change');
+        return;
+      }
+      if (key === 'gridSize') {
+        state.config.gridSize = value;
+        if (state.config.snapToGrid) {
+          resnapRectangles();
+          queueSolve('grid-size-change', { immediate: true });
+        }
+        return;
+      }
+      if (key === 'minWidth' || key === 'maxWidth' || key === 'minHeight' || key === 'maxHeight') {
+        updateDimensionRange(key, value);
+        return;
+      }
+    });
+  });
+}
+
+function wireSelectorControls(selectors) {
+  selectors.algorithm.select.addEventListener('change', () => {
+    state.config.algorithm = selectors.algorithm.select.value;
+    queueSolve('algorithm-change');
+  });
+  selectors.heuristic.select.addEventListener('change', () => {
+    state.config.heuristic = selectors.heuristic.select.value;
+    queueSolve('heuristic-change');
+  });
+}
+
+function wireNumberControls(numberInputs) {
+  ['canvasWidth', 'canvasHeight'].forEach((key) => {
+    numberInputs[key].input.addEventListener('change', () => {
+      const value = clamp(numberInputs[key].input.valueAsNumber || 0, MIN_CANVAS_SIZE, MAX_CANVAS_SIZE);
+      numberInputs[key].input.value = String(value);
+      state.config[key] = state.config.snapToGrid ? snapToGrid(value, state.config.gridSize) : value;
+      applyCanvasSize();
+    });
+  });
+}
+
+function wireAddRectanglePanel(panel) {
+  panel.form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const width = panel.width.valueAsNumber || state.config.minWidth;
+    const height = panel.height.valueAsNumber || state.config.minHeight;
+    const count = clamp(panel.count.valueAsNumber || 1, 1, 5);
+    addCustomRectangles(width, height, count);
+    panel.form.reset();
+  });
+}
+
+function updateDimensionRange(key, value) {
+  if (key === 'minWidth') {
+    state.config.minWidth = Math.min(value, state.config.maxWidth - 4);
+  } else if (key === 'maxWidth') {
+    state.config.maxWidth = Math.max(value, state.config.minWidth + 4);
+  } else if (key === 'minHeight') {
+    state.config.minHeight = Math.min(value, state.config.maxHeight - 4);
+  } else if (key === 'maxHeight') {
+    state.config.maxHeight = Math.max(value, state.config.minHeight + 4);
+  }
+  clampDimensionSliders();
+  regenerateRectangles({ keepCount: true, silent: true });
+  queueSolve('dimension-range', { immediate: true });
+}
+
+function clampDimensionSliders() {
+  const { minWidth, maxWidth, minHeight, maxHeight } = state.ui.sliders;
+  minWidth.input.value = String(state.config.minWidth);
+  minWidth.output.textContent = minWidth.input.value;
+  maxWidth.input.value = String(state.config.maxWidth);
+  maxWidth.output.textContent = maxWidth.input.value;
+  minHeight.input.value = String(state.config.minHeight);
+  minHeight.output.textContent = minHeight.input.value;
+  maxHeight.input.value = String(state.config.maxHeight);
+  maxHeight.output.textContent = maxHeight.input.value;
+}
+
+function applyCanvasSize() {
+  const width = clamp(state.config.canvasWidth, MIN_CANVAS_SIZE, MAX_CANVAS_SIZE);
+  const height = clamp(state.config.canvasHeight, MIN_CANVAS_SIZE, MAX_CANVAS_SIZE);
+  state.config.canvasWidth = width;
+  state.config.canvasHeight = height;
+  setupHiDPICanvas(state.ui.canvas, width, height);
+  queueSolve('canvas-size', { immediate: true });
+}
+
+function adjustRectangleCount(target) {
+  const safeTarget = clamp(target, MIN_RECTANGLES, MAX_RECTANGLES);
+  state.config.rectangleCount = safeTarget;
+  const current = state.rectangles.length;
+  if (safeTarget > current) {
+    for (let i = current; i < safeTarget; i += 1) {
+      state.rectangles.push(createRectangle());
     }
-    queueSolve('shape-count-increase', { immediate: state.config.autoRerun });
-  } else if (target < current) {
-    state.shapes.splice(target);
-    queueSolve('shape-count-decrease', { immediate: state.config.autoRerun });
-  } else {
-    queueSolve('shape-count-adjust', { immediate: state.config.autoRerun });
+  } else if (safeTarget < current) {
+    state.rectangles.splice(safeTarget);
   }
-  updateOverlay();
+  syncRectangleCountControl();
+  updateInventory();
+  queueSolve('rect-count', { immediate: state.config.autoRerun });
 }
 
-function regeneratePopulation() {
+function syncRectangleCountControl() {
+  const slider = state.ui.sliders.rectangleCount;
+  slider.input.value = String(state.rectangles.length);
+  slider.output.textContent = slider.input.value;
+}
+
+function seedRectangles(count) {
   state.colorIndex = 0;
-  state.shapes = [];
-  generatePopulation(state.config.shapeCount);
-  queueSolve('regenerate-population', { immediate: true });
-}
-
-function generatePopulation(count) {
+  state.nextLabel = 1;
+  state.rectangles = [];
   for (let i = 0; i < count; i += 1) {
-    state.shapes.push(createShape());
+    state.rectangles.push(createRectangle());
   }
-  updateOverlay();
+  syncRectangleCountControl();
+  updateInventory();
 }
 
-function addShape() {
-  if (state.shapes.length >= MAX_SHAPES) return;
-  state.shapes.push(createShape());
-  state.config.shapeCount = state.shapes.length;
-  state.ui.sliders.shapeCount.input.value = String(state.config.shapeCount);
-  state.ui.sliders.shapeCount.output.textContent = String(state.config.shapeCount);
-  updateOverlay();
-  queueSolve('add-shape', { immediate: true });
+function regenerateRectangles(options = {}) {
+  const { keepCount = false, silent = false } = options;
+  if (!keepCount) {
+    state.config.rectangleCount = clamp(state.config.rectangleCount, MIN_RECTANGLES, MAX_RECTANGLES);
+  }
+  seedRectangles(state.config.rectangleCount);
+  if (!silent) {
+    queueSolve('regenerate', { immediate: true });
+  }
 }
 
-function removeShape() {
-  if (state.shapes.length <= 3) return;
-  state.shapes.pop();
-  state.config.shapeCount = state.shapes.length;
-  state.ui.sliders.shapeCount.input.value = String(state.config.shapeCount);
-  state.ui.sliders.shapeCount.output.textContent = String(state.config.shapeCount);
-  updateOverlay();
-  queueSolve('remove-shape', { immediate: true });
+function addCustomRectangles(width, height, count) {
+  const additions = Math.min(count, MAX_RECTANGLES - state.rectangles.length);
+  for (let i = 0; i < additions; i += 1) {
+    state.rectangles.push(createRectangle({ width, height }));
+  }
+  state.config.rectangleCount = state.rectangles.length;
+  syncRectangleCountControl();
+  updateInventory();
+  queueSolve('custom-add', { immediate: true });
+}
+
+function removeRectangle() {
+  if (state.rectangles.length <= MIN_RECTANGLES) return;
+  state.rectangles.pop();
+  state.config.rectangleCount = state.rectangles.length;
+  syncRectangleCountControl();
+  updateInventory();
+  queueSolve('remove-rectangle', { immediate: true });
+}
+
+function resnapRectangles() {
+  if (!state.config.snapToGrid) return;
+  state.rectangles = state.rectangles.map((rect) => {
+    const width = snapDimension(rect.width);
+    const height = snapDimension(rect.height);
+    return {
+      ...rect,
+      width,
+      height,
+      area: width * height
+    };
+  });
+  updateInventory();
 }
 
 function queueSolve(reason, options = {}) {
@@ -338,7 +502,8 @@ function queueSolve(reason, options = {}) {
   }
 
   const run = () => {
-    const result = runSolver(state.shapes, state.config);
+    cancelAnimation();
+    const result = runSolver(state.rectangles, state.config);
     state.placements = result.placed;
     state.failed = result.failed;
     state.stats = {
@@ -348,9 +513,13 @@ function queueSolve(reason, options = {}) {
       placedArea: result.placedArea
     };
     updateSummary();
-    updateOverlay();
+    updateInventory();
     updateFailureList();
-    draw();
+    if (state.placements.length) {
+      startAnimation(state.placements);
+    } else {
+      draw();
+    }
   };
 
   if (immediate || !state.config.autoRerun) {
@@ -363,159 +532,309 @@ function queueSolve(reason, options = {}) {
     if (currentToken === state.rerunToken) {
       run();
     }
-  }, 140);
+  }, 130);
 }
 
-function runSolver(shapes, config) {
-  const placed = [];
-  const failed = [];
-  let attempts = 0;
+function runSolver(rectangles, config) {
+  const ordered = orderRectangles(rectangles, config.heuristic);
+  const board = {
+    width: config.canvasWidth,
+    height: config.canvasHeight,
+    padding: config.padding,
+    gridSize: config.gridSize,
+    snapToGrid: config.snapToGrid
+  };
+  let result;
   const start = performance.now();
-
-  const sorted = [...shapes].sort((a, b) => b.area - a.area);
-  const angles = computeAngleCandidates(config);
-  const width = CANVAS_WIDTH;
-  const height = CANVAS_HEIGHT;
-  const padding = config.padding;
-  const translationStep = Math.max(1, config.translationStep);
-
-  for (const shape of sorted) {
-    const placedShape = placeShape(shape, angles, placed, {
-      width,
-      height,
-      padding,
-      translationStep
-    });
-    attempts += placedShape.attempts;
-    if (placedShape.success) {
-      placed.push(placedShape.payload);
-    } else {
-      failed.push({
-        id: shape.id,
-        area: shape.area
-      });
-    }
+  if (config.algorithm === 'shelf') {
+    result = runShelfPacking(ordered, board);
+  } else if (config.algorithm === 'binary-tree') {
+    result = runBinaryPacking(ordered, board);
+  } else {
+    result = runBottomLeftPacking(ordered, board);
   }
 
   const runtime = Math.round(performance.now() - start);
-  const sheetArea = width * height;
-  const placedArea = placed.reduce((sum, item) => sum + item.area, 0);
-  const utilisation = sheetArea ? Math.min(100, Math.round((placedArea / sheetArea) * 1000) / 10) : 0;
-
-  // Restore input order for rendering overlays.
-  placed.sort((a, b) => a.order - b.order);
+  const placedArea = result.placements.reduce((sum, rect) => sum + rect.width * rect.height, 0);
+  const sheetArea = board.width * board.height;
+  const utilisation = sheetArea ? Math.min(100, (placedArea / sheetArea) * 100) : 0;
 
   return {
-    placed,
-    failed,
-    attempts,
+    placed: result.placements,
+    failed: result.failed,
+    attempts: result.attempts,
     runtime,
     utilisation,
     placedArea
   };
 }
 
-function placeShape(shape, angles, alreadyPlaced, board) {
+function orderRectangles(rectangles, heuristic) {
+  const ordered = rectangles.map((rect) => ({ ...rect }));
+  switch (heuristic) {
+    case 'height-desc':
+      ordered.sort((a, b) => b.height - a.height || b.width - a.width);
+      break;
+    case 'width-desc':
+      ordered.sort((a, b) => b.width - a.width || b.height - a.height);
+      break;
+    case 'input-order':
+      ordered.sort((a, b) => a.order - b.order);
+      break;
+    default:
+      ordered.sort((a, b) => b.area - a.area);
+  }
+  return ordered;
+}
+
+function runBottomLeftPacking(rectangles, board) {
+  const placements = [];
+  const failed = [];
   let attempts = 0;
-  const { width, height, padding, translationStep } = board;
-  let resolved = null;
-
-  const angleList = angles.length && state.config.allowRotation ? angles : [0];
-
-  outer: for (const angle of angleList) {
-    const rotated = rotatePolygon(shape.basePoints, angle);
-    const bounds = getBounds(rotated);
-    const offsetX = -bounds.minX;
-    const offsetY = -bounds.minY;
-    const adjusted = translatePolygon(rotated, offsetX, offsetY);
-    const maxX = width - (bounds.maxX - bounds.minX) - padding;
-    const maxY = height - (bounds.maxY - bounds.minY) - padding;
-
-    for (let y = padding; y <= maxY; y += translationStep) {
-      for (let x = padding; x <= maxX; x += translationStep) {
+  const step = board.snapToGrid ? board.gridSize : Math.max(4, Math.round(Math.min(board.width, board.height) / 160));
+  for (const rect of rectangles) {
+    let placed = false;
+    const limitX = board.width - board.padding - rect.width;
+    const limitY = board.height - board.padding - rect.height;
+    for (let y = board.padding; y <= limitY; y += step) {
+      for (let x = board.padding; x <= limitX; x += step) {
         attempts += 1;
-        const candidate = translatePolygon(adjusted, x, y);
-        if (!fitsWithin(candidate, width, height, padding)) continue;
-        if (hasOverlap(candidate, alreadyPlaced)) continue;
-        resolved = {
-          success: true,
-          payload: {
-            id: shape.id,
-            order: shape.order,
-            color: shape.color,
-            points: candidate,
-            rotation: angle,
-            area: shape.area,
-            centroid: shape.centroid
-          },
-          attempts
+        const candidate = {
+          ...rect,
+          x: board.snapToGrid ? snapToGrid(x, board.gridSize) : x,
+          y: board.snapToGrid ? snapToGrid(y, board.gridSize) : y
         };
-        break outer;
+        if (!fitsWithinBoard(candidate, board)) continue;
+        if (rectanglesOverlap(candidate, placements)) continue;
+        placements.push(candidate);
+        placed = true;
+        break;
       }
+      if (placed) break;
+    }
+    if (!placed) {
+      failed.push(summariseRect(rect));
     }
   }
+  return { placements, failed, attempts };
+}
 
-  if (!resolved) {
-    resolved = {
-      success: false,
-      attempts
+function runShelfPacking(rectangles, board) {
+  const placements = [];
+  const failed = [];
+  let attempts = 0;
+  let shelfY = board.padding;
+  let shelfHeight = 0;
+  let cursorX = board.padding;
+  const usableWidth = board.width - board.padding;
+
+  for (const rect of rectangles) {
+    if (cursorX + rect.width > usableWidth) {
+      shelfY += shelfHeight + (board.snapToGrid ? board.gridSize : 8);
+      cursorX = board.padding;
+      shelfHeight = 0;
+    }
+    if (shelfY + rect.height > board.height - board.padding) {
+      failed.push(summariseRect(rect));
+      continue;
+    }
+    const candidate = {
+      ...rect,
+      x: board.snapToGrid ? snapToGrid(cursorX, board.gridSize) : cursorX,
+      y: board.snapToGrid ? snapToGrid(shelfY, board.gridSize) : shelfY
     };
+    if (!fitsWithinBoard(candidate, board) || rectanglesOverlap(candidate, placements)) {
+      failed.push(summariseRect(rect));
+      continue;
+    }
+    placements.push(candidate);
+    cursorX = candidate.x + rect.width + (board.snapToGrid ? 0 : 4);
+    shelfHeight = Math.max(shelfHeight, rect.height);
+    attempts += 1;
   }
-
-  return resolved;
+  return { placements, failed, attempts };
 }
 
-function computeAngleCandidates(config) {
-  const maxAngle = 180;
-  const step = Math.max(0, Math.min(90, config.rotationStep));
-  if (!config.allowRotation || step === 0) {
-    return [0];
+function runBinaryPacking(rectangles, board) {
+  const placements = [];
+  const failed = [];
+  let attempts = 0;
+  const root = {
+    x: board.padding,
+    y: board.padding,
+    width: board.width - board.padding * 2,
+    height: board.height - board.padding * 2,
+    used: false,
+    right: null,
+    down: null
+  };
+
+  for (const rect of rectangles) {
+    const node = findNode(root, rect.width, rect.height);
+    if (node) {
+      const split = splitNode(node, rect.width, rect.height);
+      const candidate = {
+        ...rect,
+        x: board.snapToGrid ? snapToGrid(split.x, board.gridSize) : split.x,
+        y: board.snapToGrid ? snapToGrid(split.y, board.gridSize) : split.y
+      };
+      placements.push(candidate);
+      attempts += 1;
+    } else {
+      failed.push(summariseRect(rect));
+    }
   }
-  const angles = [0];
-  for (let angle = step; angle <= maxAngle; angle += step) {
-    angles.push(angle);
-  }
-  return angles;
+  return { placements, failed, attempts };
 }
 
-function createShape() {
-  const sides = randomInt(3, state.config.maxSides);
-  const maxRadius = state.config.maxRadius;
-  const minRadius = Math.max(18, Math.round(maxRadius * 0.45));
-  const base = createConvexPolygon(sides, minRadius, maxRadius);
-  const centroid = computeCentroid(base);
-  const centered = base.map((point) => ({
-    x: point.x - centroid.x,
-    y: point.y - centroid.y
-  }));
-  const area = Math.abs(polygonArea(centered));
+function findNode(node, width, height) {
+  if (!node) return null;
+  if (node.used) {
+    return findNode(node.right, width, height) || findNode(node.down, width, height);
+  }
+  if (width <= node.width && height <= node.height) {
+    return node;
+  }
+  return null;
+}
 
+function splitNode(node, width, height) {
+  node.used = true;
+  node.down = {
+    x: node.x,
+    y: node.y + height,
+    width: node.width,
+    height: node.height - height,
+    used: false,
+    right: null,
+    down: null
+  };
+  node.right = {
+    x: node.x + width,
+    y: node.y,
+    width: node.width - width,
+    height,
+    used: false,
+    right: null,
+    down: null
+  };
+  return node;
+}
+
+function fitsWithinBoard(rect, board) {
+  return (
+    rect.x >= board.padding &&
+    rect.y >= board.padding &&
+    rect.x + rect.width <= board.width - board.padding + 0.0001 &&
+    rect.y + rect.height <= board.height - board.padding + 0.0001
+  );
+}
+
+function rectanglesOverlap(candidate, placed) {
+  return placed.some((existing) => {
+    return !(
+      candidate.x + candidate.width <= existing.x ||
+      candidate.x >= existing.x + existing.width ||
+      candidate.y + candidate.height <= existing.y ||
+      candidate.y >= existing.y + existing.height
+    );
+  });
+}
+
+function summariseRect(rect) {
   return {
-    id: `poly-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    order: state.colorIndex += 1,
-    basePoints: centered,
-    centroid,
-    area,
+    id: rect.id,
+    width: rect.width,
+    height: rect.height,
+    area: rect.width * rect.height
+  };
+}
+
+function createRectangle(dimensions = {}) {
+  const maxWidth = Math.max(MIN_RECT_SIZE, state.config.canvasWidth - state.config.padding * 2);
+  const maxHeight = Math.max(MIN_RECT_SIZE, state.config.canvasHeight - state.config.padding * 2);
+  const width = snapDimension(
+    clamp(dimensions.width || randomInt(state.config.minWidth, state.config.maxWidth), MIN_RECT_SIZE, maxWidth)
+  );
+  const height = snapDimension(
+    clamp(dimensions.height || randomInt(state.config.minHeight, state.config.maxHeight), MIN_RECT_SIZE, maxHeight)
+  );
+  const label = `Rect ${String(state.nextLabel).padStart(2, '0')}`;
+  const order = state.nextLabel;
+  state.nextLabel += 1;
+  state.colorIndex += 1;
+  return {
+    id: label,
+    order,
+    width,
+    height,
+    area: width * height,
     color: pickColor(state.colorIndex)
   };
 }
 
-function createConvexPolygon(sides, minRadius, maxRadius) {
-  const angles = [];
-  for (let i = 0; i < sides; i += 1) {
-    angles.push(Math.random() * Math.PI * 2);
+function snapDimension(value) {
+  if (!state.config.snapToGrid) return value;
+  return snapToGrid(value, state.config.gridSize);
+}
+
+function snapToGrid(value, step) {
+  const safeStep = Math.max(2, step);
+  return Math.max(safeStep, Math.round(value / safeStep) * safeStep);
+}
+
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function startAnimation(frames) {
+  if (!frames.length) {
+    draw();
+    return;
   }
-  angles.sort((a, b) => a - b);
+  state.animation = {
+    frames,
+    visibleCount: 0,
+    rafId: null,
+    lastTimestamp: 0
+  };
+  draw();
+  state.animation.rafId = requestAnimationFrame(stepAnimation);
+}
 
-  const points = angles.map((angle) => {
-    const radius = lerp(minRadius, maxRadius, Math.random());
-    return {
-      x: Math.cos(angle) * radius,
-      y: Math.sin(angle) * radius
-    };
-  });
+function stepAnimation(timestamp) {
+  if (!state.animation) return;
+  if (!state.animation.lastTimestamp) {
+    state.animation.lastTimestamp = timestamp;
+  }
+  if (timestamp - state.animation.lastTimestamp >= state.config.animationSpeed) {
+    state.animation.visibleCount = Math.min(state.animation.frames.length, state.animation.visibleCount + 1);
+    state.animation.lastTimestamp = timestamp;
+    draw();
+    if (state.animation.visibleCount >= state.animation.frames.length) {
+      cancelAnimation();
+      return;
+    }
+  }
+  state.animation.rafId = requestAnimationFrame(stepAnimation);
+}
 
-  return points;
+function cancelAnimation() {
+  if (state.animation?.rafId) {
+    cancelAnimationFrame(state.animation.rafId);
+  }
+  state.animation = null;
+}
+
+function getVisiblePlacements() {
+  if (state.animation) {
+    return state.animation.frames.slice(0, state.animation.visibleCount);
+  }
+  return state.placements;
 }
 
 function draw() {
@@ -523,13 +842,10 @@ function draw() {
   const canvas = state.ui.canvas;
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   drawBackground(ctx, canvas);
-
-  for (const placement of state.placements) {
-    drawPolygon(ctx, placement);
+  for (const placement of getVisiblePlacements()) {
+    drawRectangle(ctx, placement);
   }
-
   ctx.restore();
 }
 
@@ -541,7 +857,7 @@ function drawBackground(ctx, canvas) {
   ctx.translate(0.5, 0.5);
   ctx.strokeStyle = 'rgba(255,255,255,0.06)';
   ctx.lineWidth = 1;
-  const gridSize = 40;
+  const gridSize = state.config.snapToGrid ? state.config.gridSize : 40;
   for (let x = 0; x <= canvas.width; x += gridSize) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
@@ -566,52 +882,48 @@ function drawBackground(ctx, canvas) {
   );
 }
 
-function drawPolygon(ctx, placement) {
-  const points = placement.points;
-  if (!points.length) return;
-
+function drawRectangle(ctx, placement) {
   ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i += 1) {
-    ctx.lineTo(points[i].x, points[i].y);
-  }
-  ctx.closePath();
   ctx.fillStyle = placement.color;
   ctx.globalAlpha = 0.85;
-  ctx.fill();
+  ctx.fillRect(placement.x, placement.y, placement.width, placement.height);
 
   ctx.globalAlpha = 1;
   ctx.lineWidth = 2;
   ctx.strokeStyle = 'rgba(15, 23, 42, 0.7)';
-  ctx.stroke();
+  ctx.strokeRect(placement.x, placement.y, placement.width, placement.height);
 
   ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-  const centroid = computeCentroid(points);
   ctx.font = '12px "JetBrains Mono", Menlo, monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(placement.id, centroid.x, centroid.y);
-
+  ctx.fillText(
+    placement.id,
+    placement.x + placement.width / 2,
+    placement.y + placement.height / 2
+  );
   ctx.restore();
 }
 
 function updateSummary() {
   const { summaryFields } = state.ui;
-  summaryFields.placed.textContent = `${state.placements.length} / ${state.shapes.length}`;
+  summaryFields.placed.textContent = `${state.placements.length} / ${state.rectangles.length}`;
   summaryFields.failed.textContent = String(state.failed.length);
   summaryFields.utilisation.textContent = `${state.stats.utilisation.toFixed(1)}%`;
   summaryFields.attempts.textContent = state.stats.attempts.toLocaleString();
   summaryFields.runtime.textContent = `${state.stats.runtime} ms`;
 }
 
-function updateOverlay() {
-  const list = state.ui.overlayList;
+function updateInventory() {
+  const list = state.ui.inventoryList;
   list.innerHTML = '';
-  state.shapes.forEach((shape) => {
+  state.rectangles.forEach((rect) => {
     const item = document.createElement('li');
-    item.style.setProperty('--swatch', shape.color);
-    item.textContent = `${shape.id} · ${shape.area.toFixed(0)}px²`;
+    item.style.setProperty('--swatch', rect.color);
+    item.innerHTML = `
+      <span class="rect-label">${rect.id}</span>
+      <span>${rect.width}×${rect.height}px</span>
+    `;
     list.appendChild(item);
   });
 }
@@ -622,151 +934,19 @@ function updateFailureList() {
   if (!state.failed.length) {
     const success = document.createElement('p');
     success.className = 'all-fit';
-    success.textContent = 'All polygons fitted inside the sheet.';
+    success.textContent = 'All rectangles fitted inside the sheet.';
     list.appendChild(success);
     return;
   }
   const headline = document.createElement('p');
   headline.className = 'fail-headline';
-  headline.textContent = 'Unplaced polygons';
+  headline.textContent = 'Unplaced rectangles';
   list.appendChild(headline);
   state.failed.forEach((entry) => {
     const li = document.createElement('li');
-    li.textContent = `${entry.id} (${entry.area.toFixed(0)}px²)`;
+    li.textContent = `${entry.id} — ${entry.width}×${entry.height}px`;
     list.appendChild(li);
   });
-}
-
-function fitsWithin(points, width, height, padding) {
-  for (const point of points) {
-    if (point.x < padding || point.y < padding) return false;
-    if (point.x > width - padding) return false;
-    if (point.y > height - padding) return false;
-  }
-  return true;
-}
-
-function hasOverlap(candidate, placed) {
-  for (const existing of placed) {
-    if (boundingBoxesOverlap(candidate, existing.points) && polygonsOverlap(candidate, existing.points)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function boundingBoxesOverlap(aPoints, bPoints) {
-  const a = getBounds(aPoints);
-  const b = getBounds(bPoints);
-  return !(a.maxX < b.minX || a.minX > b.maxX || a.maxY < b.minY || a.minY > b.maxY);
-}
-
-function polygonsOverlap(aPoints, bPoints) {
-  return !hasSeparatingAxis(aPoints, bPoints) && !hasSeparatingAxis(bPoints, aPoints);
-}
-
-function hasSeparatingAxis(aPoints, bPoints) {
-  for (let i = 0; i < aPoints.length; i += 1) {
-    const p1 = aPoints[i];
-    const p2 = aPoints[(i + 1) % aPoints.length];
-    const axis = { x: -(p2.y - p1.y), y: p2.x - p1.x };
-    const normalised = normalise(axis);
-    const [amin, amax] = projectPolygon(aPoints, normalised);
-    const [bmin, bmax] = projectPolygon(bPoints, normalised);
-    if (amax < bmin || bmax < amin) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function projectPolygon(points, axis) {
-  let min = Infinity;
-  let max = -Infinity;
-  for (const point of points) {
-    const projection = point.x * axis.x + point.y * axis.y;
-    min = Math.min(min, projection);
-    max = Math.max(max, projection);
-  }
-  return [min, max];
-}
-
-function normalise(vector) {
-  const length = Math.hypot(vector.x, vector.y) || 1;
-  return {
-    x: vector.x / length,
-    y: vector.y / length
-  };
-}
-
-function rotatePolygon(points, angleDegrees) {
-  const angle = (angleDegrees * Math.PI) / 180;
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
-  return points.map((point) => ({
-    x: point.x * cos - point.y * sin,
-    y: point.x * sin + point.y * cos
-  }));
-}
-
-function translatePolygon(points, dx, dy) {
-  return points.map((point) => ({
-    x: point.x + dx,
-    y: point.y + dy
-  }));
-}
-
-function getBounds(points) {
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  for (const point of points) {
-    if (point.x < minX) minX = point.x;
-    if (point.y < minY) minY = point.y;
-    if (point.x > maxX) maxX = point.x;
-    if (point.y > maxY) maxY = point.y;
-  }
-  return { minX, minY, maxX, maxY };
-}
-
-function polygonArea(points) {
-  let sum = 0;
-  for (let i = 0; i < points.length; i += 1) {
-    const current = points[i];
-    const next = points[(i + 1) % points.length];
-    sum += current.x * next.y - next.x * current.y;
-  }
-  return sum / 2;
-}
-
-function computeCentroid(points) {
-  const area = polygonArea(points);
-  let cx = 0;
-  let cy = 0;
-  let factor;
-  for (let i = 0; i < points.length; i += 1) {
-    const current = points[i];
-    const next = points[(i + 1) % points.length];
-    factor = current.x * next.y - next.x * current.y;
-    cx += (current.x + next.x) * factor;
-    cy += (current.y + next.y) * factor;
-  }
-  const scaledArea = area * 6 || 1;
-  return {
-    x: cx / scaledArea,
-    y: cy / scaledArea
-  };
-}
-
-function setupHiDPICanvas(canvas, width, height) {
-  const ratio = window.devicePixelRatio || 1;
-  canvas.width = width * ratio;
-  canvas.height = height * ratio;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 }
 
 function createRangeControl(label, { min, max, step, value, hint }) {
@@ -785,6 +965,37 @@ function createRangeControl(label, { min, max, step, value, hint }) {
   return { group, input, output };
 }
 
+function createSelectControl(label, options, selected) {
+  const group = document.createElement('label');
+  group.className = 'select-control';
+  const select = document.createElement('select');
+  options.forEach((option) => {
+    const opt = document.createElement('option');
+    opt.value = option.value;
+    opt.textContent = option.label;
+    if (option.value === selected) {
+      opt.selected = true;
+    }
+    select.appendChild(opt);
+  });
+  group.innerHTML = `
+    <span class="control-label">${label}</span>
+  `;
+  group.appendChild(select);
+  return { group, select };
+}
+
+function createNumberControl(label, { min, max, value }) {
+  const group = document.createElement('label');
+  group.className = 'number-control';
+  group.innerHTML = `
+    <span class="control-label">${label}</span>
+    <input type="number" min="${min}" max="${max}" value="${value}" />
+  `;
+  const input = group.querySelector('input');
+  return { group, input };
+}
+
 function createCheckboxControl(label, checked, onChange) {
   const group = document.createElement('label');
   group.className = 'toggle-control';
@@ -792,10 +1003,8 @@ function createCheckboxControl(label, checked, onChange) {
   input.type = 'checkbox';
   input.checked = checked;
   input.addEventListener('change', () => onChange(input.checked));
-
   const span = document.createElement('span');
   span.textContent = label;
-
   group.append(input, span);
   return { group, input };
 }
@@ -810,12 +1019,37 @@ function createButton(label, background, onClick) {
   return button;
 }
 
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function createAddRectanglePanel() {
+  const form = document.createElement('form');
+  form.className = 'add-rect-panel';
+  form.innerHTML = `
+    <div>
+      <span class="control-label">Add custom rectangle</span>
+      <p class="control-hint">Set width, height, and how many to create.</p>
+    </div>
+    <div class="add-rect-grid">
+      <label>Width (px)<input type="number" name="rectWidth" min="${MIN_RECT_SIZE}" max="600" value="120" required /></label>
+      <label>Height (px)<input type="number" name="rectHeight" min="${MIN_RECT_SIZE}" max="600" value="80" required /></label>
+      <label>Count<input type="number" name="rectCount" min="1" max="5" value="1" required /></label>
+    </div>
+    <button type="submit" class="lab-button" style="--btn-color:#22c55e;">Add rectangle</button>
+  `;
+  return {
+    form,
+    width: form.querySelector('input[name="rectWidth"]'),
+    height: form.querySelector('input[name="rectHeight"]'),
+    count: form.querySelector('input[name="rectCount"]')
+  };
 }
 
-function lerp(a, b, t) {
-  return a + (b - a) * t;
+function setupHiDPICanvas(canvas, width, height) {
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = width * ratio;
+  canvas.height = height * ratio;
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 }
 
 function pickColor(index) {
