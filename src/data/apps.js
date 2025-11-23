@@ -1,5 +1,13 @@
 export const apps = [
     {
+      slug: 'apriltag-scout',
+      title: 'AprilTag Scout',
+      blurb: 'Stream a live camera view as AprilTags are outlined with IDs, family metadata, pose hints, and orientation arrows.',
+      icon: '🎯',
+      href: 'apps/apriltag-scout/index.html',
+      accent: '#ff914d'
+    },
+    {
       slug: 'clean-url-tracker-remover',
       title: 'Clean URL Trimmer',
       blurb: 'Paste a sharing link and drop all the ad trackers, redirect junk, and campaign tags in one click.',
