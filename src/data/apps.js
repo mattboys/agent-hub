@@ -8,6 +8,14 @@ export const apps = [
       accent: '#ff914d'
     },
     {
+      slug: 'scan-vector-lab',
+      title: 'Dimension Scan Lab',
+      blurb: 'Print a calibrated board, lock onto the tags, and export mm-accurate SVG, DXF, or PDF outlines of objects on the page.',
+      icon: '📐',
+      href: 'apps/scan-vector-lab/index.html',
+      accent: '#1f7a8c'
+    },
+    {
       slug: 'clean-url-tracker-remover',
       title: 'Clean URL Trimmer',
       blurb: 'Paste a sharing link and drop all the ad trackers, redirect junk, and campaign tags in one click.',
