@@ -10,7 +10,17 @@ import * as Comlink from 'comlink';
 const ACCENT = '#ff914d';
 const DETECTION_INTERVAL_MS = 90;
 const FPS_SMOOTHING = 0.2;
-const DEFAULT_TAG_FAMILY = 'tag36h11';
+const DETECTION_RETENTION_MS = 350;
+const SUPPORTED_TAG_FAMILIES = [
+  'tag16h5',
+  'tag25h9',
+  'tag36h11',
+  'tagCircle21h7',
+  'tagCircle49h12',
+  'tagCustom48h12',
+  'tagStandard41h12',
+  'tagStandard52h13'
+];
 const CAMERA_CONSTRAINTS = {
   audio: false,
   video: {
@@ -29,6 +39,10 @@ const { body } = createAppShell({
 
 const ui = buildLayout();
 body.appendChild(ui.root);
+ui.fullscreenButton.addEventListener('click', () => {
+  toggleFullscreen();
+});
+handleFullscreenChange();
 
 const captureCanvas = document.createElement('canvas');
 const captureCtx = captureCanvas.getContext('2d', { willReadFrequently: true });
@@ -49,7 +63,8 @@ const state = {
   lastFrameTimestamp: 0,
   grayBuffer: null,
   poseConfiguredFor: null,
-  pendingError: null
+  pendingError: null,
+  activeDetections: new Map()
 };
 
 ui.cameraButton.addEventListener('click', () => {
@@ -67,6 +82,35 @@ document.addEventListener('visibilitychange', () => {
     scheduleLoop();
   }
 });
+
+document.addEventListener('fullscreenchange', () => {
+  handleFullscreenChange();
+});
+
+function toggleFullscreen() {
+  if (isStageFullscreen()) {
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+    return;
+  }
+  const target = ui.stageView;
+  if (target?.requestFullscreen) {
+    target.requestFullscreen({ navigationUI: 'hide' }).catch((error) => {
+      console.warn('Unable to enter fullscreen', error);
+    });
+  }
+}
+
+function handleFullscreenChange() {
+  const active = isStageFullscreen();
+  ui.fullscreenButton.textContent = active ? 'Exit full screen' : 'Full screen';
+  ui.fullscreenButton.dataset.state = active ? 'active' : '';
+}
+
+function isStageFullscreen() {
+  return document.fullscreenElement === ui.stageView;
+}
 
 async function startCamera() {
   if (!navigator.mediaDevices?.getUserMedia) {
@@ -106,6 +150,9 @@ function stopCamera() {
   if (state.stream) {
     state.stream.getTracks().forEach((track) => track.stop());
   }
+  if (document.fullscreenElement === ui.stageView && document.exitFullscreen) {
+    document.exitFullscreen().catch(() => {});
+  }
   state.stream = null;
   ui.video.srcObject = null;
   ui.stage.dataset.state = 'idle';
@@ -113,7 +160,8 @@ function stopCamera() {
   ui.cameraStatus.set('Camera idle', 'neutral');
   ui.overlayMessage.textContent = 'Enable your camera to see live detections.';
   clearOverlay();
-  updateDetections([]);
+  state.activeDetections.clear();
+  updateDetections([], performance.now());
 }
 
 function pauseLoop() {
@@ -185,8 +233,8 @@ async function processFrame(now) {
     }
 
     const detections = await detector.detect(frame.gray, frame.width, frame.height);
-    renderOverlay(frame.width, frame.height, detections);
-    updateDetections(detections);
+      renderOverlay(frame.width, frame.height, detections);
+      updateDetections(detections, now);
     updateStats(detections, now);
   } catch (error) {
     setError('AprilTag detection failed.');
@@ -331,8 +379,26 @@ function computeFps(now) {
   return state.fps;
 }
 
-function updateDetections(rawDetections = []) {
-  if (!rawDetections.length) {
+function updateDetections(rawDetections = [], now = performance.now()) {
+  if (!state.activeDetections) {
+    state.activeDetections = new Map();
+  }
+
+  rawDetections.forEach((det) => {
+    state.activeDetections.set(buildDetectionKey(det), { data: det, lastSeen: now });
+  });
+
+  for (const [key, entry] of state.activeDetections) {
+    if (now - entry.lastSeen > DETECTION_RETENTION_MS) {
+      state.activeDetections.delete(key);
+    }
+  }
+
+  const persisted = Array.from(state.activeDetections.values())
+    .sort((a, b) => compareDetections(a.data, b.data))
+    .map((entry) => entry.data);
+
+  if (!persisted.length) {
     ui.detectionsList.dataset.state = 'empty';
     ui.detectionsList.innerHTML = '';
     ui.detectionsList.appendChild(ui.emptyDetections);
@@ -341,7 +407,7 @@ function updateDetections(rawDetections = []) {
 
   ui.detectionsList.dataset.state = 'ready';
   ui.detectionsList.innerHTML = '';
-  rawDetections.forEach((det) => {
+  persisted.forEach((det) => {
     ui.detectionsList.appendChild(renderDetectionCard(det));
   });
 }
@@ -349,6 +415,8 @@ function updateDetections(rawDetections = []) {
 function renderDetectionCard(detection) {
   const angle = extractOrientation(detection.corners);
   const color = colorForId(detection.id);
+  const familyName = detectionFamily(detection);
+  const sizeLabel = formatMillimeters(detection.pose?.size ?? detection.size);
 
   const card = document.createElement('article');
   card.className = 'detection-card';
@@ -358,9 +426,9 @@ function renderDetectionCard(detection) {
   header.innerHTML = `
     <div>
       <p class="detection-label">Tag #${detection.id}</p>
-      <h3>${DEFAULT_TAG_FAMILY}</h3>
+      <h3>${familyName}</h3>
     </div>
-    <span class="chip">${formatMillimeters(detection.size)}</span>
+    <span class="chip">${sizeLabel}</span>
   `;
 
   const dial = document.createElement('div');
@@ -473,11 +541,17 @@ function buildLayout() {
   cameraButton.className = 'primary-button';
   cameraButton.textContent = 'Enable camera';
 
+  const fullscreenButton = document.createElement('button');
+  fullscreenButton.type = 'button';
+  fullscreenButton.className = 'ghost-button';
+  fullscreenButton.textContent = 'Full screen';
+
   const familyIndicator = document.createElement('span');
   familyIndicator.className = 'family-pill';
-  familyIndicator.innerHTML = `<strong>Family:</strong> ${DEFAULT_TAG_FAMILY}`;
+  familyIndicator.innerHTML = `<strong>Families:</strong> ${SUPPORTED_TAG_FAMILIES.join(' • ')}`;
+  familyIndicator.title = SUPPORTED_TAG_FAMILIES.join(', ');
 
-  controlBar.append(cameraButton, familyIndicator);
+  controlBar.append(cameraButton, fullscreenButton, familyIndicator);
 
   const metrics = document.createElement('div');
   metrics.className = 'metrics-row';
@@ -519,10 +593,12 @@ function buildLayout() {
   return {
     root,
     stage,
+    stageView,
     video,
     overlay,
     overlayMessage,
     cameraButton,
+    fullscreenButton,
     cameraStatus,
     detectorStatus,
     detectionsList,
@@ -608,6 +684,22 @@ function formatError(value) {
 
 function colorForId(id) {
   return `hsl(${(id * 47) % 360}, 78%, 60%)`;
+}
+
+function detectionFamily(detection = {}) {
+  return detection.family || 'tag36h11';
+}
+
+function buildDetectionKey(detection = {}) {
+  return `${detectionFamily(detection)}:${detection.id ?? 'unknown'}`;
+}
+
+function compareDetections(a = {}, b = {}) {
+  const familyDiff = detectionFamily(a).localeCompare(detectionFamily(b));
+  if (familyDiff) {
+    return familyDiff;
+  }
+  return (a.id ?? 0) - (b.id ?? 0);
 }
 
 function buildAssetUrl(path) {
