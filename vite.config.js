@@ -27,6 +27,7 @@ module.exports = defineConfig({
         palette: resolve(__dirname, 'apps/vibe-palette/index.html'),
         paletteMaker: resolve(__dirname, 'apps/palette-maker/index.html'),
         aprilTagScout: resolve(__dirname, 'apps/apriltag-scout/index.html'),
+        cameraFilterLab: resolve(__dirname, 'apps/camera-filter-lab/index.html'),
         qr: resolve(__dirname, 'apps/qr-code-generator/index.html'),
         cleanUrlTrackerRemover: resolve(__dirname, 'apps/clean-url-tracker-remover/index.html'),
         browserDiagnostic: resolve(__dirname, 'apps/browser-diagnostic/index.html'),
