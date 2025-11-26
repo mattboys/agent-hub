@@ -102,5 +102,13 @@ export const apps = [
       icon: '🧩',
       href: 'apps/nesting-algorithm-visualizer/index.html',
       accent: '#ff6f61'
+    },
+    {
+      slug: 'sokoban-vault',
+      title: 'Sokoban Vault',
+      blurb: 'Play hundreds of curated Sokoban puzzles with a progress-aware level browser and instant switching.',
+      icon: '🧱',
+      href: 'apps/sokoban-vault/index.html',
+      accent: '#f8961e'
     }
 ];
