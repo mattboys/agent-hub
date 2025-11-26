@@ -76,6 +76,11 @@ function attachEvents() {
     jumpToNextIncomplete();
   });
 
+  registerPadButton(ui.controls.pad?.up, 0, -1);
+  registerPadButton(ui.controls.pad?.down, 0, 1);
+  registerPadButton(ui.controls.pad?.left, -1, 0);
+  registerPadButton(ui.controls.pad?.right, 1, 0);
+
   ui.overlayButton.addEventListener('click', () => {
     jumpToNextIncomplete();
   });
@@ -89,6 +94,7 @@ function attachEvents() {
   });
 
   window.addEventListener('keydown', handleKeyDown);
+  enableSwipeControls();
 }
 
 function handleKeyDown(event) {
@@ -454,6 +460,11 @@ function setStatus(message, tone = 'muted') {
   ui.status.dataset.tone = tone;
 }
 
+function registerPadButton(button, dx, dy) {
+  if (!button) return;
+  button.addEventListener('click', () => attemptMove(dx, dy));
+}
+
 function isInside(x, y) {
   return y >= 0 && y < state.height && x >= 0 && x < state.width;
 }
@@ -539,6 +550,39 @@ function buildInterface(levels, sets) {
 
   controlRow.append(undoButton, resetButton, prevButton, nextButton, nextUnsolvedButton);
 
+  const controlPad = document.createElement('div');
+  controlPad.className = 'control-pad';
+  controlPad.setAttribute('aria-label', 'Directional controls');
+
+  const padButtons = {
+    up: createDirectionButton('↑', 'Move up'),
+    down: createDirectionButton('↓', 'Move down'),
+    left: createDirectionButton('←', 'Move left'),
+    right: createDirectionButton('→', 'Move right')
+  };
+
+  padButtons.up.style.gridArea = 'up';
+  padButtons.down.style.gridArea = 'down';
+  padButtons.left.style.gridArea = 'left';
+  padButtons.right.style.gridArea = 'right';
+
+  const padCenter = document.createElement('div');
+  padCenter.className = 'pad-center';
+  padCenter.style.gridArea = 'center';
+  padCenter.textContent = 'Swipe or tap';
+
+  controlPad.append(
+    createPadSpacer(),
+    padButtons.up,
+    createPadSpacer(),
+    padButtons.left,
+    padCenter,
+    padButtons.right,
+    createPadSpacer(),
+    padButtons.down,
+    createPadSpacer()
+  );
+
   const status = document.createElement('p');
   status.className = 'status-bar';
   status.dataset.tone = 'muted';
@@ -549,6 +593,7 @@ function buildInterface(levels, sets) {
     <h3>How to play</h3>
     <ul>
       <li>Use arrows, WASD, or HJKL to step around the warehouse.</li>
+      <li>On mobile, tap the arrow pad or swipe across the board to move.</li>
       <li>You can only push one crate at a time, never pull.</li>
       <li>Undo is unlimited; stash clever states to explore alternate ideas.</li>
     </ul>
@@ -557,7 +602,7 @@ function buildInterface(levels, sets) {
     </p>
   `;
 
-  playPanel.append(hud, statGrid, boardWrapper, controlRow, status, helperCard);
+  playPanel.append(hud, statGrid, boardWrapper, controlRow, controlPad, status, helperCard);
 
   const selectorPanel = document.createElement('section');
   selectorPanel.className = 'selector-panel';
@@ -654,7 +699,8 @@ function buildInterface(levels, sets) {
       reset: resetButton,
       prev: prevButton,
       next: nextButton,
-      nextUnsolved: nextUnsolvedButton
+      nextUnsolved: nextUnsolvedButton,
+      pad: padButtons
     },
     filters: {
       search: searchInput,
@@ -692,4 +738,77 @@ function createPrimaryButton(label) {
   button.className = 'primary-button';
   button.textContent = label;
   return button;
+}
+
+function createDirectionButton(symbol, label) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'pad-button';
+  button.textContent = symbol;
+  button.setAttribute('aria-label', label);
+  return button;
+}
+
+function createPadSpacer() {
+  const span = document.createElement('span');
+  span.className = 'pad-spacer';
+  return span;
+}
+
+function enableSwipeControls() {
+  let startX = 0;
+  let startY = 0;
+  let pointerId = null;
+  let active = false;
+
+  const threshold = 24;
+
+  ui.board.addEventListener('pointerdown', (event) => {
+    if (!event.isPrimary || event.pointerType === 'mouse') {
+      return;
+    }
+    active = true;
+    pointerId = event.pointerId;
+    startX = event.clientX;
+    startY = event.clientY;
+    try {
+      ui.board.setPointerCapture(pointerId);
+    } catch (error) {
+      // ignored
+    }
+  });
+
+  ui.board.addEventListener('pointerup', (event) => {
+    if (!active || event.pointerId !== pointerId) {
+      return;
+    }
+    active = false;
+    pointerId = null;
+    try {
+      ui.board.releasePointerCapture(event.pointerId);
+    } catch (error) {
+      // ignored
+    }
+
+    const dx = event.clientX - startX;
+    const dy = event.clientY - startY;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+    if (Math.max(absX, absY) < threshold) {
+      return;
+    }
+
+    if (absX > absY) {
+      attemptMove(dx > 0 ? 1 : -1, 0);
+    } else {
+      attemptMove(0, dy > 0 ? 1 : -1);
+    }
+  });
+
+  ui.board.addEventListener('pointercancel', (event) => {
+    if (event.pointerId === pointerId) {
+      active = false;
+      pointerId = null;
+    }
+  });
 }
