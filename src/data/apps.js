@@ -8,6 +8,14 @@ export const apps = [
       accent: '#ff914d'
     },
     {
+      slug: 'camera-filter-lab',
+      title: 'FilterCam Playground',
+      blurb: 'Open your webcam, then bounce between cinematic, diagnostic, and just-for-fun filter presets complete with live descriptions.',
+      icon: '📷',
+      href: 'apps/camera-filter-lab/index.html',
+      accent: '#ff5f6d'
+    },
+    {
       slug: 'scan-vector-lab',
       title: 'Dimension Scan Lab',
       blurb: 'Print a calibrated board, lock onto the tags, and export mm-accurate SVG, DXF, or PDF outlines of objects on the page.',
