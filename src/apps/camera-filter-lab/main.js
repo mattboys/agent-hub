@@ -545,7 +545,7 @@ async function bootCamera() {
       video: {
         width: { ideal: 1920 },
         height: { ideal: 1080 },
-        facingMode: 'environment'
+        facingMode: { ideal: 'user' }
       },
       audio: false
     };
