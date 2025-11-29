@@ -2,7 +2,7 @@ import { createAppShell } from '../shared/appShell.js';
 import './styles.css';
 
 const ACCENT = '#ff7b54';
-const DEFAULT_HINT = 'Tip: press Enter to drop the name into the grid.';
+const DEFAULT_HINT = 'Keep names short so columns stay readable on phones.';
 
 const { body } = createAppShell({
   title: 'Scorecard Studio',
@@ -20,8 +20,9 @@ playerCard.className = 'score-card';
 const playerHeader = document.createElement('header');
 playerHeader.className = 'card-header';
 playerHeader.innerHTML = `
-  <h2>Columns</h2>
-  <p>Name every player, team, or category you want to track. Each name becomes a column in the grid.</p>
+  <p class="section-eyebrow">Setup</p>
+  <h2>Players & columns</h2>
+  <p>Short names keep the grid tight on small screens.</p>
 `;
 playerCard.appendChild(playerHeader);
 
@@ -60,10 +61,9 @@ tableCard.dataset.state = 'empty';
 const tableHeader = document.createElement('div');
 tableHeader.className = 'score-table-header';
 tableHeader.innerHTML = `
-  <div>
-    <h2>Score grid</h2>
-    <p>Create a fresh row whenever someone scores or a new round finishes.</p>
-  </div>
+  <p class="section-eyebrow">Rounds</p>
+  <h2>Score grid</h2>
+  <p>Tap add row every time a round lands. Totals update instantly.</p>
 `;
 
 const addRowButton = document.createElement('button');
@@ -72,16 +72,30 @@ addRowButton.className = 'primary-button';
 addRowButton.textContent = 'Add row';
 addRowButton.disabled = true;
 
-tableHeader.appendChild(addRowButton);
-tableCard.appendChild(tableHeader);
+const tableUtilities = document.createElement('div');
+tableUtilities.className = 'score-table-utilities';
+
+const totalsStrip = document.createElement('div');
+totalsStrip.className = 'totals-strip';
+totalsStrip.dataset.state = 'empty';
+totalsStrip.textContent = 'Totals appear as soon as you add columns.';
+
+tableUtilities.append(totalsStrip, addRowButton);
+
+tableCard.append(tableHeader, tableUtilities);
 
 const scoreEmpty = document.createElement('p');
 scoreEmpty.className = 'score-empty';
-scoreEmpty.textContent = 'Add at least one name to spin up the grid.';
+scoreEmpty.textContent = 'Add a name to create your grid.';
 tableCard.appendChild(scoreEmpty);
 
 const tableWrapper = document.createElement('div');
 tableWrapper.className = 'score-table-wrapper';
+tableWrapper.dataset.scrollState = 'none';
+tableWrapper.addEventListener('scroll', handleTableScroll);
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', handleTableScroll);
+}
 tableCard.appendChild(tableWrapper);
 
 app.append(playerCard, tableCard);
@@ -107,7 +121,10 @@ const refs = {
   scoreEmpty,
   playerList,
   playerHint,
-  totalCells: []
+  totalsStrip,
+  totalCells: [],
+  totalBadges: new Map(),
+  playerChipTotals: new Map()
 };
 
 setPlayerHint();
@@ -164,15 +181,23 @@ function addRow() {
   };
   state.rows.push(newRow);
   renderScoreTable();
+  requestAnimationFrame(() => {
+    const lastRowLabel = refs.tableWrapper.querySelector('tbody tr:last-child .row-label-input');
+    if (lastRowLabel) {
+      lastRowLabel.focus();
+      lastRowLabel.select();
+    }
+  });
 }
 
 function renderPlayerList() {
   refs.playerList.innerHTML = '';
+  refs.playerChipTotals = new Map();
   if (!state.players.length) {
     refs.playerList.classList.add('player-list-empty');
     const empty = document.createElement('p');
     empty.className = 'player-empty';
-    empty.textContent = 'No columns yet. Add players or teams to begin.';
+    empty.textContent = 'No columns yet. Add a name above to start.';
     refs.playerList.appendChild(empty);
     return;
   }
@@ -180,8 +205,23 @@ function renderPlayerList() {
   state.players.forEach((player, index) => {
     const chip = document.createElement('span');
     chip.className = 'player-chip';
-    chip.textContent = `${index + 1}. ${player.name}`;
+
+    const chipIndex = document.createElement('span');
+    chipIndex.className = 'player-chip-index';
+    chipIndex.textContent = index + 1;
+
+    const chipName = document.createElement('span');
+    chipName.className = 'player-chip-name';
+    chipName.textContent = player.name;
+
+    const chipTotal = document.createElement('span');
+    chipTotal.className = 'player-chip-total';
+    chipTotal.textContent = '0';
+    chipTotal.setAttribute('aria-label', `Running total for ${player.name}`);
+
+    chip.append(chipIndex, chipName, chipTotal);
     refs.playerList.appendChild(chip);
+    refs.playerChipTotals.set(player.id, chipTotal);
   });
 }
 
@@ -189,10 +229,13 @@ function renderScoreTable() {
   if (!state.players.length) {
     refs.tableWrapper.innerHTML = '';
     refs.scoreEmpty.hidden = false;
-    refs.scoreEmpty.textContent = 'Add at least one name to spin up the grid.';
+    refs.scoreEmpty.textContent = 'Add a name to create your grid.';
     refs.tableCard.dataset.state = 'empty';
     refs.addRowButton.disabled = true;
     refs.totalCells = [];
+    refs.totalBadges = new Map();
+    renderTotalsStrip();
+    requestAnimationFrame(updateScrollShadows);
     return;
   }
 
@@ -200,7 +243,7 @@ function renderScoreTable() {
   refs.tableCard.dataset.state = 'ready';
   refs.scoreEmpty.hidden = state.rows.length > 0;
   if (!state.rows.length) {
-    refs.scoreEmpty.textContent = 'No rows yet. Tap “Add row” whenever someone scores.';
+    refs.scoreEmpty.textContent = 'No rows yet. Tap “Add row” after each round.';
   }
 
   const table = document.createElement('table');
@@ -236,6 +279,7 @@ function renderScoreTable() {
     const td = document.createElement('td');
     td.textContent = '0';
     td.dataset.playerId = player.id;
+    td.dataset.playerName = player.name;
     totalsRow.appendChild(td);
     totalCells.push(td);
   });
@@ -265,6 +309,7 @@ function renderScoreTable() {
 
     state.players.forEach((player, colIndex) => {
       const cell = document.createElement('td');
+      cell.dataset.playerName = player.name;
       const input = document.createElement('input');
       input.type = 'number';
       input.inputMode = 'decimal';
@@ -288,21 +333,109 @@ function renderScoreTable() {
   refs.tableWrapper.innerHTML = '';
   refs.tableWrapper.appendChild(table);
   refs.totalCells = totalCells;
+  renderTotalsStrip();
   updateTotals();
+  requestAnimationFrame(updateScrollShadows);
+}
+
+let scrollUpdateId = null;
+
+function handleTableScroll() {
+  if (scrollUpdateId) {
+    cancelAnimationFrame(scrollUpdateId);
+  }
+  scrollUpdateId = requestAnimationFrame(updateScrollShadows);
+}
+
+function updateScrollShadows() {
+  scrollUpdateId = null;
+  const wrapper = refs.tableWrapper;
+  if (!wrapper) {
+    return;
+  }
+  const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+  if (maxScroll <= 2) {
+    wrapper.dataset.scrollState = 'none';
+    return;
+  }
+  const left = wrapper.scrollLeft;
+  const atStart = left <= 2;
+  const atEnd = left >= maxScroll - 2;
+  if (atStart && !atEnd) {
+    wrapper.dataset.scrollState = 'right';
+    return;
+  }
+  if (atEnd && !atStart) {
+    wrapper.dataset.scrollState = 'left';
+    return;
+  }
+  if (!atStart && !atEnd) {
+    wrapper.dataset.scrollState = 'middle';
+    return;
+  }
+  wrapper.dataset.scrollState = 'none';
+}
+
+function renderTotalsStrip() {
+  const { totalsStrip } = refs;
+  if (!totalsStrip) {
+    return;
+  }
+  refs.totalBadges = new Map();
+  totalsStrip.innerHTML = '';
+
+  if (!state.players.length) {
+    totalsStrip.dataset.state = 'empty';
+    const hint = document.createElement('span');
+    hint.className = 'totals-empty';
+    hint.textContent = 'Totals appear once columns exist.';
+    totalsStrip.appendChild(hint);
+    return;
+  }
+
+  totalsStrip.dataset.state = 'ready';
+  state.players.forEach((player) => {
+    const badge = document.createElement('span');
+    badge.className = 'total-badge';
+    const name = document.createElement('span');
+    name.className = 'total-badge-name';
+    name.textContent = player.name;
+    const value = document.createElement('strong');
+    value.className = 'total-badge-value';
+    value.textContent = '0';
+    badge.append(name, value);
+    totalsStrip.appendChild(badge);
+    refs.totalBadges.set(player.id, value);
+  });
 }
 
 function updateTotals() {
   if (!refs.totalCells.length) {
+    renderTotalsStrip();
     return;
   }
+
   const totals = state.players.map((_, colIndex) => {
     return state.rows.reduce((acc, row) => acc + parseScore(row.scores[colIndex]), 0);
   });
 
+  const formattedTotals = totals.map((value) => formatSignedNumber(value));
+
   refs.totalCells.forEach((cell, index) => {
     const total = totals[index];
-    cell.textContent = formatSignedNumber(total);
+    cell.textContent = formattedTotals[index];
     cell.dataset.polarity = total > 0 ? 'positive' : total < 0 ? 'negative' : 'neutral';
+  });
+
+  state.players.forEach((player, index) => {
+    const badge = refs.totalBadges.get(player.id);
+    if (badge) {
+      badge.textContent = formattedTotals[index];
+    }
+    const chipTotal = refs.playerChipTotals.get(player.id);
+    if (chipTotal) {
+      chipTotal.textContent = formattedTotals[index];
+    }
   });
 }
 
