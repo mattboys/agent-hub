@@ -36,7 +36,8 @@ module.exports = defineConfig({
         quickDiff: resolve(__dirname, 'apps/quick-diff/index.html'),
         nestingAlgorithmVisualizer: resolve(__dirname, 'apps/nesting-algorithm-visualizer/index.html'),
         dimensionScanLab: resolve(__dirname, 'apps/scan-vector-lab/index.html'),
-        sokobanVault: resolve(__dirname, 'apps/sokoban-vault/index.html')
+        sokobanVault: resolve(__dirname, 'apps/sokoban-vault/index.html'),
+        scoreTakingApp: resolve(__dirname, 'apps/score-taking-app/index.html')
       }
     }
   },
