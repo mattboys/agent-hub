@@ -110,5 +110,13 @@ export const apps = [
       icon: '🧱',
       href: 'apps/sokoban-vault/index.html',
       accent: '#f8961e'
+    },
+    {
+      slug: 'score-taking-app',
+      title: 'Scorecard Studio',
+      blurb: 'Build ad-hoc score grids: add columns for players, log rounds, and keep running totals pinned to the top row.',
+      icon: '📊',
+      href: 'apps/score-taking-app/index.html',
+      accent: '#ff7b54'
     }
 ];
