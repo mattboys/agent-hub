@@ -8,6 +8,14 @@ export const apps = [
       accent: '#ff914d'
     },
     {
+      slug: 'morse-code-studio',
+      title: 'Morse Code Studio',
+      blurb: 'Tap, speak, or type Morse to decode live, then generate matching dots, dashes, and tone playback.',
+      icon: '📡',
+      href: 'apps/morse-code-studio/index.html',
+      accent: '#ffd166'
+    },
+    {
       slug: 'camera-filter-lab',
       title: 'FilterCam Playground',
       blurb: 'Open your webcam, then bounce between cinematic, diagnostic, and just-for-fun filter presets complete with live descriptions.',
