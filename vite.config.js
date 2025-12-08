@@ -37,7 +37,8 @@ module.exports = defineConfig({
         nestingAlgorithmVisualizer: resolve(__dirname, 'apps/nesting-algorithm-visualizer/index.html'),
         dimensionScanLab: resolve(__dirname, 'apps/scan-vector-lab/index.html'),
         sokobanVault: resolve(__dirname, 'apps/sokoban-vault/index.html'),
-        scoreTakingApp: resolve(__dirname, 'apps/score-taking-app/index.html')
+        scoreTakingApp: resolve(__dirname, 'apps/score-taking-app/index.html'),
+        morseCodeStudio: resolve(__dirname, 'apps/morse-code-studio/index.html')
       }
     }
   },
