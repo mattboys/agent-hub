@@ -38,7 +38,8 @@ module.exports = defineConfig({
         dimensionScanLab: resolve(__dirname, 'apps/scan-vector-lab/index.html'),
         sokobanVault: resolve(__dirname, 'apps/sokoban-vault/index.html'),
         scoreTakingApp: resolve(__dirname, 'apps/score-taking-app/index.html'),
-        morseCodeStudio: resolve(__dirname, 'apps/morse-code-studio/index.html')
+        morseCodeStudio: resolve(__dirname, 'apps/morse-code-studio/index.html'),
+        pianoAndStave: resolve(__dirname, 'apps/piano-and-stave/index.html')
       }
     }
   },
