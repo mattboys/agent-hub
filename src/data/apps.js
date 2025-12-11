@@ -134,5 +134,13 @@ export const apps = [
       icon: '📊',
       href: 'apps/score-taking-app/index.html',
       accent: '#ff7b54'
+    },
+    {
+      slug: 'piano-and-stave',
+      title: 'Piano Stave Studio',
+      blurb: 'Click a piano, hear each tone, and watch matching notes land on a live treble staff.',
+      icon: '🎹',
+      href: 'apps/piano-and-stave/index.html',
+      accent: '#6f6bff'
     }
 ];
