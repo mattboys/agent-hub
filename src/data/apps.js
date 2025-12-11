@@ -8,6 +8,14 @@ export const apps = [
       accent: '#ff914d'
     },
     {
+      slug: 'create-dot-to-dot-designer',
+      title: 'Dot-to-Dot Designer',
+      blurb: 'Drop numbered dots on a blank canvas, preview links mid-drag, and undo or clear to polish your connect-the-dots artwork.',
+      icon: '🔢',
+      href: 'apps/create-dot-to-dot-designer/index.html',
+      accent: '#7ad7ff'
+    },
+    {
       slug: 'morse-code-studio',
       title: 'Morse Code Studio',
       blurb: 'Tap, speak, or type Morse to decode live, then generate matching dots, dashes, and tone playback.',
