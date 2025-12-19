@@ -322,7 +322,8 @@ function cleanUrl(rawInput) {
     cleanedUrl: cleanedHref,
     fullCleanedUrl: canonicalHref,
     removed,
-    protocolNote: protocolNote || null
+    protocolNote: protocolNote || null,
+    displayAddedPrefix: prepared.addedPrefix
   };
 }
 
@@ -375,15 +376,53 @@ function restoreParameter(item) {
   if (!state.lastResult || state.lastResult.status !== 'clean') {
     return;
   }
-  
-  const currentCleanUrl = state.lastResult.fullCleanedUrl || state.lastResult.cleanedUrl;
-  const url = new URL(currentCleanUrl.startsWith('http') ? currentCleanUrl : `https://${currentCleanUrl}`);
+
+  const { lastResult } = state;
+  const baseHref =
+    lastResult.fullCleanedUrl ||
+    prepareUrl(lastResult.cleanedUrl || '').href;
+
+  let url;
+  try {
+    url = new URL(baseHref);
+  } catch (error) {
+    console.error('Unable to restore parameter due to invalid base URL.', error);
+    return;
+  }
+
   url.searchParams.set(item.key, item.value);
-  
-  const newUrl = normaliseForDisplay(url.toString(), { addedPrefix: state.lastResult.protocolNote ? 'https://' : '' });
-  
-  inputField.value = newUrl;
-  runClean({ force: true });
+
+  const updatedFullHref = url.toString();
+  const displayAddedPrefix = lastResult.displayAddedPrefix ?? '';
+  const updatedDisplayHref = normaliseForDisplay(updatedFullHref, { addedPrefix: displayAddedPrefix });
+
+  const updatedRemoved = removeRestoredParameter(lastResult.removed, item);
+
+  const updatedResult = {
+    ...lastResult,
+    cleanedUrl: updatedDisplayHref,
+    fullCleanedUrl: updatedFullHref,
+    removed: updatedRemoved
+  };
+
+  state.lastResult = updatedResult;
+  renderResult(updatedResult);
+}
+
+function removeRestoredParameter(removedItems = [], restoredItem) {
+  if (!removedItems.length) {
+    return [];
+  }
+
+  const index = removedItems.findIndex(
+    (entry) => entry.key === restoredItem.key && entry.value === restoredItem.value
+  );
+
+  if (index === -1) {
+    return [...removedItems];
+  }
+
+  return removedItems.filter((_, idx) => idx !== index);
 }
 
 function escapeHtml(value) {
