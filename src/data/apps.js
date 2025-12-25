@@ -104,6 +104,14 @@ export const apps = [
       accent: '#64d7ff'
     },
     {
+      slug: 'random-name-selector',
+      title: 'Random Name Selector',
+      blurb: 'Paste a list of names, shuffle once, and reveal each name exactly once with a Next button.',
+      icon: '🎲',
+      href: 'apps/random-name-selector/index.html',
+      accent: '#7ee8fa'
+    },
+    {
       slug: 'browser-diagnostic',
       title: 'Browser Systems Diagnostic',
       blurb: 'Run a slow, deliberate sweep of browser features, permissions, and experimental APIs from a glowing command console.',

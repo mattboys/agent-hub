@@ -30,6 +30,7 @@ module.exports = defineConfig({
         aprilTagScout: resolve(__dirname, 'apps/apriltag-scout/index.html'),
         cameraFilterLab: resolve(__dirname, 'apps/camera-filter-lab/index.html'),
         qr: resolve(__dirname, 'apps/qr-code-generator/index.html'),
+        randomNameSelector: resolve(__dirname, 'apps/random-name-selector/index.html'),
         cleanUrlTrackerRemover: resolve(__dirname, 'apps/clean-url-tracker-remover/index.html'),
         browserDiagnostic: resolve(__dirname, 'apps/browser-diagnostic/index.html'),
         romanNumeralTranslator: resolve(__dirname, 'apps/roman-numeral-translator/index.html'),
