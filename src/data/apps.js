@@ -88,6 +88,14 @@ export const apps = [
       accent: '#5ae4a7'
     },
     {
+      slug: 'text-case-studio',
+      title: 'Text Case Studio',
+      blurb: 'Paste text from your clipboard and instantly convert it to title case, sentence case, lower case, and more.',
+      icon: '🔤',
+      href: 'apps/text-case-studio/index.html',
+      accent: '#2dd4bf'
+    },
+    {
       slug: 'palette-maker',
       title: 'Palette Maker',
       blurb: 'Build harmonious palettes with theory-backed suggestions and accessibility checks.',
