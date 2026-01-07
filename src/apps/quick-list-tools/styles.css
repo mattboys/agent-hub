@@ -1,0 +1,186 @@
+.qlt-layout {
+  display: grid;
+  gap: 22px;
+}
+
+.qlt-controls {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(18, 19, 36, 0.82);
+}
+
+.qlt-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+}
+
+.qlt-field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.qlt-field span {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.qlt-field select,
+.qlt-field input[type='text'] {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 26, 0.7);
+  padding: 10px 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+}
+
+.qlt-field select:focus-visible,
+.qlt-field input[type='text']:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.14));
+  box-shadow: 0 0 0 4px rgba(120, 120, 255, 0.12);
+}
+
+.qlt-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.qlt-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(10, 12, 26, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.qlt-toggle input {
+  width: 18px;
+  height: 18px;
+}
+
+.qlt-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.qlt-btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.qlt-btn.primary {
+  background: color-mix(in srgb, var(--accent) 36%, rgba(255, 255, 255, 0.14));
+  border-color: color-mix(in srgb, var(--accent) 42%, rgba(255, 255, 255, 0.14));
+}
+
+.qlt-btn:hover,
+.qlt-btn:focus-visible {
+  outline: none;
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--accent) 18%, rgba(255, 255, 255, 0.14));
+  border-color: color-mix(in srgb, var(--accent) 40%, rgba(255, 255, 255, 0.14));
+}
+
+.qlt-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.qlt-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 960px) {
+  .qlt-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+.qlt-panel {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(18, 19, 36, 0.82);
+  display: grid;
+  gap: 12px;
+}
+
+.qlt-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.qlt-panel-title {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.qlt-stats {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.qlt-textarea {
+  min-height: 320px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 26, 0.7);
+  font-family: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', monospace;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.9);
+  resize: vertical;
+}
+
+.qlt-textarea:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.14));
+}
+
+.qlt-status {
+  padding: 12px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.32);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.92rem;
+}
+
+.qlt-status[data-state='error'] {
+  border-color: rgba(255, 81, 134, 0.45);
+  color: #ffb8c3;
+}
+
+.qlt-status[data-state='ok'] {
+  border-color: rgba(120, 255, 205, 0.2);
+}
