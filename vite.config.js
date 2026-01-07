@@ -37,6 +37,7 @@ module.exports = defineConfig({
         romanNumeralTranslator: resolve(__dirname, 'apps/roman-numeral-translator/index.html'),
         reverseEngineeringLab: resolve(__dirname, 'apps/reverse-engineering-lab/index.html'),
         quickDiff: resolve(__dirname, 'apps/quick-diff/index.html'),
+        quickListTools: resolve(__dirname, 'apps/quick-list-tools/index.html'),
         nestingAlgorithmVisualizer: resolve(__dirname, 'apps/nesting-algorithm-visualizer/index.html'),
         dimensionScanLab: resolve(__dirname, 'apps/scan-vector-lab/index.html'),
         sokobanVault: resolve(__dirname, 'apps/sokoban-vault/index.html'),

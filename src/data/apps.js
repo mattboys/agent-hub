@@ -56,6 +56,14 @@ export const apps = [
       accent: '#3a86ff'
     },
     {
+      slug: 'quick-list-tools',
+      title: 'Quick List Tools',
+      blurb: 'Paste a list and instantly sort it, de-dupe values, run a frequency count, quote items, and convert delimiters.',
+      icon: '📋',
+      href: 'apps/quick-list-tools/index.html',
+      accent: '#7ee8fa'
+    },
+    {
       slug: 'reverse-engineering-lab',
       title: 'Protocol Decoder Lab',
       blurb: 'Paste unknown data blobs to detect encodings, decode bytes, and identify common protocols automatically.',
