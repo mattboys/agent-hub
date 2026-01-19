@@ -35,6 +35,7 @@ module.exports = defineConfig({
         cleanUrlTrackerRemover: resolve(__dirname, 'apps/clean-url-tracker-remover/index.html'),
         browserDiagnostic: resolve(__dirname, 'apps/browser-diagnostic/index.html'),
         romanNumeralTranslator: resolve(__dirname, 'apps/roman-numeral-translator/index.html'),
+        slopeInterceptCalculator: resolve(__dirname, 'apps/slope-intercept-calculator/index.html'),
         reverseEngineeringLab: resolve(__dirname, 'apps/reverse-engineering-lab/index.html'),
         quickDiff: resolve(__dirname, 'apps/quick-diff/index.html'),
         quickListTools: resolve(__dirname, 'apps/quick-list-tools/index.html'),
