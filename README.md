@@ -48,6 +48,7 @@ A lightweight, all-static showcase for Matt's growing collection of vibe-coded w
 > ⚠️ Reminder for Cursor agents: GitHub Pages only publishes the HTML files listed in `rollupOptions.input`. If a new app 404s after deploy, double-check that its `apps/<slug>/index.html` path is present in `vite.config.js`.
 
 ## 🧰 Working with Cursor AI Agents
+- Follow the conventions in `AGENTS.md`, especially the `vite.config.js` entry list for new apps to prevent 404s on Pages.
 - Keep the dev server running (`npm run dev`) for instant local previews while editing with Cursor.
 - Use `npm run build` before pushing significant updates to catch bundle-time issues.
 - The project sticks to vanilla JS + CSS, so no extra build steps are needed for agents to modify or extend features.
