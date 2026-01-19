@@ -1,0 +1,234 @@
+.linear-calculator {
+  display: grid;
+  gap: 22px;
+}
+
+@media (min-width: 960px) {
+  .linear-calculator {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  }
+}
+
+.calc-card {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  padding: clamp(18px, 3vw, 24px);
+  border-radius: 24px;
+  background: rgba(11, 14, 27, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 20px 35px rgba(12, 7, 2, 0.35);
+}
+
+.result-card[data-state='error'] {
+  border-color: rgba(255, 81, 134, 0.45);
+}
+
+.calc-card-header {
+  display: grid;
+  gap: 6px;
+}
+
+.calc-eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.calc-card-header h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 1.72rem);
+  letter-spacing: -0.01em;
+}
+
+.calc-card-header p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.calc-form {
+  display: grid;
+  gap: 16px;
+}
+
+.point-grid {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 720px) {
+  .point-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.point-fieldset {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 26, 0.7);
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.point-fieldset legend {
+  padding: 0 6px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.field-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field-group {
+  display: grid;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.9rem;
+}
+
+.field-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.field-input {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 26, 0.7);
+  padding: 10px 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.98rem;
+}
+
+.field-input:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.14));
+  box-shadow: 0 0 0 4px rgba(120, 120, 255, 0.12);
+}
+
+.field-input[aria-invalid='true'] {
+  border-color: rgba(255, 99, 132, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 99, 132, 0.2);
+}
+
+.calc-helper {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+}
+
+.action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.action-button {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.action-button.primary {
+  background: color-mix(in srgb, var(--accent) 36%, rgba(255, 255, 255, 0.14));
+  border-color: color-mix(in srgb, var(--accent) 42%, rgba(255, 255, 255, 0.14));
+}
+
+.action-button.ghost {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.action-button:hover,
+.action-button:focus-visible {
+  outline: none;
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--accent) 18%, rgba(255, 255, 255, 0.14));
+  border-color: color-mix(in srgb, var(--accent) 40%, rgba(255, 255, 255, 0.14));
+}
+
+.result-status {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.95rem;
+}
+
+.result-card[data-state='error'] .result-status {
+  color: #ffb8c3;
+}
+
+.result-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.result-item {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 26, 0.7);
+  display: grid;
+  gap: 6px;
+}
+
+.result-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.result-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.equation-block {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 26, 0.7);
+  display: grid;
+  gap: 6px;
+}
+
+.equation-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.equation-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.equation-hint {
+  margin: 0;
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.point-summary {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.65);
+}
