@@ -80,6 +80,14 @@ export const apps = [
       accent: '#f08c4a'
     },
     {
+      slug: 'slope-intercept-calculator',
+      title: 'Slope-Intercept Calculator',
+      blurb: 'Enter two points to solve the slope (m) and intercept (c) in y = mx + c.',
+      icon: '📈',
+      href: 'apps/slope-intercept-calculator/index.html',
+      accent: '#4cc9f0'
+    },
+    {
       slug: 'vibe-palette',
       title: 'Aura Gradient Mixer',
       blurb: 'Blend colors into dreamy gradients and copy CSS-ready code in a snap.',
