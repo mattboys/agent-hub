@@ -40,6 +40,14 @@ export const apps = [
       accent: '#1f7a8c'
     },
     {
+      slug: 'screen-shape-measurement-tool',
+      title: 'Screen Shape Measurement Tool',
+      blurb: 'Estimate screen scale, calibrate a reference line, and preview real-world shapes on screen.',
+      icon: '📏',
+      href: 'apps/screen-shape-measurement-tool/index.html',
+      accent: '#5cf7c1'
+    },
+    {
       slug: 'clean-url-tracker-remover',
       title: 'Clean URL Trimmer',
       blurb: 'Paste a sharing link and drop all the ad trackers, redirect junk, and campaign tags in one click.',

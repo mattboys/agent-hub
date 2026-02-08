@@ -40,6 +40,7 @@ module.exports = defineConfig({
         quickListTools: resolve(__dirname, 'apps/quick-list-tools/index.html'),
         nestingAlgorithmVisualizer: resolve(__dirname, 'apps/nesting-algorithm-visualizer/index.html'),
         dimensionScanLab: resolve(__dirname, 'apps/scan-vector-lab/index.html'),
+        screenShapeMeasurementTool: resolve(__dirname, 'apps/screen-shape-measurement-tool/index.html'),
         sokobanVault: resolve(__dirname, 'apps/sokoban-vault/index.html'),
         scoreTakingApp: resolve(__dirname, 'apps/score-taking-app/index.html'),
         morseCodeStudio: resolve(__dirname, 'apps/morse-code-studio/index.html'),
