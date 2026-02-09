@@ -33,8 +33,9 @@ A lightweight, all-static showcase for Matt's growing collection of vibe-coded w
 
 ### GitHub Pages automation
 1. Push to `main` (or use *Run workflow* in Actions) to trigger `.github/workflows/deploy.yml`.
-2. The workflow installs dependencies, runs `npm run build`, and publishes the `dist/` folder to the `github-pages` environment.
-3. In repository settings → Pages, pick *GitHub Actions* as the source the first time.
+2. The workflow installs dependencies, runs `npm run build`, and publishes the `dist/` folder to the `gh-pages` branch.
+3. In repository settings → Pages, pick *Deploy from a branch* and select the `gh-pages` branch with the root folder.
+4. PR preview builds use the same `gh-pages` branch under `pr-preview/`, so keep branch-based Pages enabled.
 
 > If your repo uses a different default branch, update the `branches:` list in `deploy.yml` accordingly.
 
