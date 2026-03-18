@@ -45,7 +45,8 @@ module.exports = defineConfig({
         scoreTakingApp: resolve(__dirname, 'apps/score-taking-app/index.html'),
         morseCodeStudio: resolve(__dirname, 'apps/morse-code-studio/index.html'),
         pianoAndStave: resolve(__dirname, 'apps/piano-and-stave/index.html'),
-        slopeInterceptCalculator: resolve(__dirname, 'apps/slope-intercept-calculator/index.html')
+        slopeInterceptCalculator: resolve(__dirname, 'apps/slope-intercept-calculator/index.html'),
+        taskTracker: resolve(__dirname, 'apps/task-tracker/index.html')
       }
     }
   },

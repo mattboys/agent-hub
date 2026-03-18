@@ -176,6 +176,14 @@ export const apps = [
       accent: '#ff7b54'
     },
     {
+      slug: 'task-tracker',
+      title: 'Task Tracker',
+      blurb: 'A lightweight Jira-style board. Kanban grouped by user, backlog, sprint states, and points tracking—all saved locally.',
+      icon: '📋',
+      href: 'apps/task-tracker/index.html',
+      accent: '#4f46e5'
+    },
+    {
       slug: 'piano-and-stave',
       title: 'Piano Stave Studio',
       blurb: 'Click a piano, hear each tone, and watch matching notes land on a live treble staff.',
