@@ -192,6 +192,14 @@ export const apps = [
       accent: '#e07a5f'
     },
     {
+      slug: 'markdown-repair',
+      title: 'Markdown Repair',
+      blurb: 'Repair and reformat markdown: fix line breaks, soft hyphens, broken bullets, tables, trailing spaces, and extra line breaks.',
+      icon: '📝',
+      href: 'apps/markdown-repair/index.html',
+      accent: '#6ee7b7'
+    },
+    {
       slug: 'piano-and-stave',
       title: 'Piano Stave Studio',
       blurb: 'Click a piano, hear each tone, and watch matching notes land on a live treble staff.',
