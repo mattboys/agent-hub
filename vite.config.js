@@ -46,7 +46,8 @@ module.exports = defineConfig({
         morseCodeStudio: resolve(__dirname, 'apps/morse-code-studio/index.html'),
         pianoAndStave: resolve(__dirname, 'apps/piano-and-stave/index.html'),
         slopeInterceptCalculator: resolve(__dirname, 'apps/slope-intercept-calculator/index.html'),
-        taskTracker: resolve(__dirname, 'apps/task-tracker/index.html')
+        taskTracker: resolve(__dirname, 'apps/task-tracker/index.html'),
+        pdfForensicAnalysis: resolve(__dirname, 'apps/pdf-forensic-analysis/index.html')
       }
     }
   },

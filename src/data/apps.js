@@ -184,6 +184,14 @@ export const apps = [
       accent: '#4f46e5'
     },
     {
+      slug: 'pdf-forensic-analysis',
+      title: 'PDF Forensic Analysis',
+      blurb: 'Upload a PDF and inspect low-level forensic details: version, features, embedded images, compression, fonts, and more. Runs entirely in your browser.',
+      icon: '🔍',
+      href: 'apps/pdf-forensic-analysis/index.html',
+      accent: '#e07a5f'
+    },
+    {
       slug: 'piano-and-stave',
       title: 'Piano Stave Studio',
       blurb: 'Click a piano, hear each tone, and watch matching notes land on a live treble staff.',
