@@ -4,10 +4,13 @@ import './styles.css';
 const ACCENT = '#00d4aa';
 
 const FFT_SIZE = 2048;
-const HEATMAP_COLS = 480;
-const HEATMAP_FREQ_ROWS = 256;
-const GRAPH_MAX_BINS = 1024;
+/** Frequency runs along X (log scale); history scrolls down Y. */
+const HEATMAP_FREQ_COLS = 480;
+const HEATMAP_HISTORY_ROWS = 280;
 const AVG_ALPHA = 0.92;
+
+/** Lower bound of log frequency axis (Hz); avoids log(0). */
+const FREQ_AXIS_MIN_HZ = 20;
 
 const MIN_DB = -100;
 const MAX_DB = 0;
@@ -15,7 +18,7 @@ const MAX_DB = 0;
 const { body } = createAppShell({
   title: 'Audio Spectrum Analyser',
   description:
-    'Microphone FFT: scrolling spectrum heatmap, live spectrum with max and smoothed average, and a single-frequency meter. Choose dB or more intuitive display units.',
+    'Microphone FFT: log-frequency spectrum with max and average, a heatmap history that scrolls downward, and a single-frequency meter. Choose dB or more intuitive display units.',
   accent: ACCENT
 });
 
@@ -82,26 +85,9 @@ function makePanel(title, hint) {
   return block;
 }
 
-const heatmapPanel = makePanel(
-  'Spectrum heatmap (time scrolls left)',
-  'Each column is one analysis frame. Frequency runs bottom (low) to top (high).'
-);
-const heatmapWrap = document.createElement('div');
-heatmapWrap.className = 'canvas-wrap';
-const heatmapCanvas = document.createElement('canvas');
-heatmapCanvas.width = HEATMAP_COLS;
-heatmapCanvas.height = HEATMAP_FREQ_ROWS;
-heatmapWrap.appendChild(heatmapCanvas);
-const heatmapLegend = document.createElement('div');
-heatmapLegend.className = 'canvas-legend';
-heatmapLegend.innerHTML = '<span>Older ←</span><span>→ Newer</span>';
-heatmapPanel.appendChild(heatmapWrap);
-heatmapPanel.appendChild(heatmapLegend);
-root.appendChild(heatmapPanel);
-
 const graphPanel = makePanel(
-  'Current spectrum (FFT)',
-  'Green: live. Amber: session max. Violet: exponential average (reset clears max and averages).'
+  'Current spectrum (log frequency)',
+  'Horizontal axis is logarithmic (low left, high right). Green: live. Amber: session max. Violet: exponential average (reset clears max and averages).'
 );
 const graphWrap = document.createElement('div');
 graphWrap.className = 'canvas-wrap';
@@ -111,10 +97,27 @@ graphCanvas.height = 280;
 graphWrap.appendChild(graphCanvas);
 const graphLegend = document.createElement('div');
 graphLegend.className = 'canvas-legend';
-graphLegend.innerHTML = '<span id="graph-freq-low">0 Hz</span><span id="graph-freq-high">—</span>';
+graphLegend.innerHTML = '<span id="graph-freq-low">20 Hz</span><span id="graph-freq-high">—</span>';
 graphPanel.appendChild(graphWrap);
 graphPanel.appendChild(graphLegend);
 root.appendChild(graphPanel);
+
+const heatmapPanel = makePanel(
+  'Spectrum heatmap (history scrolls down)',
+  'Log frequency left to right. Each new frame is a row at the top; older rows move downward.'
+);
+const heatmapWrap = document.createElement('div');
+heatmapWrap.className = 'canvas-wrap heatmap-wrap';
+const heatmapCanvas = document.createElement('canvas');
+heatmapCanvas.width = HEATMAP_FREQ_COLS;
+heatmapCanvas.height = HEATMAP_HISTORY_ROWS;
+heatmapWrap.appendChild(heatmapCanvas);
+const heatmapLegend = document.createElement('div');
+heatmapLegend.className = 'canvas-legend';
+heatmapLegend.innerHTML = '<span>↑ Newer</span><span>Older ↓</span>';
+heatmapPanel.appendChild(heatmapWrap);
+heatmapPanel.appendChild(heatmapLegend);
+root.appendChild(heatmapPanel);
 
 const binPanel = makePanel(
   'Single frequency',
@@ -217,51 +220,87 @@ function resetPeaks() {
   }
 }
 
-function shiftHeatmap() {
-  const w = heatmapCanvas.width;
-  const h = heatmapCanvas.height;
-  const imageData = heatCtx.getImageData(1, 0, w - 1, h);
-  heatCtx.putImageData(imageData, 0, 0);
-  heatCtx.fillStyle = '#05060d';
-  heatCtx.fillRect(w - 1, 0, 1, h);
+function getLogFreqRange(sampleRate) {
+  const nyquist = sampleRate / 2;
+  const fMax = nyquist;
+  const fMin = Math.min(FREQ_AXIS_MIN_HZ, fMax * 0.99);
+  return { fMin, fMax };
 }
 
-function drawHeatmapColumn(sampleRate) {
+function dbAtHz(fHz, getter, sampleRate) {
   const nyquist = sampleRate / 2;
   const binCount = freqData.length;
+  const binFloat = (Math.min(nyquist, Math.max(0, fHz)) / nyquist) * (binCount - 1);
+  const i0 = Math.floor(binFloat);
+  const i1 = Math.min(binCount - 1, i0 + 1);
+  const frac = binFloat - i0;
+  return getter(i0) * (1 - frac) + getter(i1) * frac;
+}
+
+function freqToLogX(fHz, fMin, fMax, padL, gw) {
+  const lo = Math.log(Math.max(fMin, 1e-6));
+  const hi = Math.log(Math.max(fMax, fMin * 1.0001));
+  const f = Math.min(fMax, Math.max(fMin, fHz));
+  const t = (Math.log(f) - lo) / (hi - lo);
+  return padL + t * gw;
+}
+
+function logXToFreq(canvasX, fMin, fMax, padL, gw) {
+  const lo = Math.log(Math.max(fMin, 1e-6));
+  const hi = Math.log(Math.max(fMax, fMin * 1.0001));
+  const t = (canvasX - padL) / gw;
+  return Math.exp(lo + Math.min(1, Math.max(0, t)) * (hi - lo));
+}
+
+function logFreqTicksEven(fMin, fMax, count) {
+  const lo = Math.log(Math.max(fMin, 1e-6));
+  const hi = Math.log(Math.max(fMax, fMin * 1.0001));
+  const ticks = [];
+  for (let i = 0; i < count; i++) {
+    ticks.push(Math.exp(lo + (i / (count - 1)) * (hi - lo)));
+  }
+  return ticks;
+}
+
+function shiftHeatmapDown() {
   const w = heatmapCanvas.width;
   const h = heatmapCanvas.height;
-  const imageData = heatCtx.createImageData(1, h);
+  const imageData = heatCtx.getImageData(0, 0, w, h - 1);
+  heatCtx.putImageData(imageData, 0, 1);
+}
+
+function drawHeatmapTopRow(sampleRate) {
+  const { fMin, fMax } = getLogFreqRange(sampleRate);
+  const w = heatmapCanvas.width;
+  const lo = Math.log(Math.max(fMin, 1e-6));
+  const hi = Math.log(Math.max(fMax, fMin * 1.0001));
+  const imageData = heatCtx.createImageData(w, 1);
   const data = imageData.data;
 
-  for (let row = 0; row < h; row++) {
-    const f = (row / (h - 1)) * nyquist;
-    const binFloat = (f / nyquist) * (binCount - 1);
-    const i0 = Math.floor(binFloat);
-    const i1 = Math.min(binCount - 1, i0 + 1);
-    const frac = binFloat - i0;
-    const db = freqData[i0] * (1 - frac) + freqData[i1] * frac;
+  for (let col = 0; col < w; col++) {
+    const t = w <= 1 ? 0 : col / (w - 1);
+    const fHz = Math.exp(lo + t * (hi - lo));
+    const db = dbAtHz(fHz, (i) => freqData[i], sampleRate);
     const [r, g, b] = magnitudeToHeatColor(db);
-    const o = (h - 1 - row) * 4;
+    const o = col * 4;
     data[o] = r;
     data[o + 1] = g;
     data[o + 2] = b;
     data[o + 3] = 255;
   }
-  heatCtx.putImageData(imageData, w - 1, 0);
+  heatCtx.putImageData(imageData, 0, 0);
 }
 
 function drawGraph(sampleRate, unit) {
   const w = graphCanvas.width;
   const h = graphCanvas.height;
-  const padL = 48;
+  const padL = 52;
   const padR = 16;
   const padT = 14;
-  const padB = 36;
+  const padB = 40;
   const gw = w - padL - padR;
   const gh = h - padT - padB;
-  const binCount = freqData.length;
-  const nyquist = sampleRate / 2;
+  const { fMin, fMax } = getLogFreqRange(sampleRate);
 
   graphCtx.fillStyle = '#05060d';
   graphCtx.fillRect(0, 0, w, h);
@@ -291,18 +330,31 @@ function drawGraph(sampleRate, unit) {
     graphCtx.fillText(label, 6, y + 4);
   }
 
-  const displayBins = Math.min(binCount, GRAPH_MAX_BINS);
+  graphCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+  graphCtx.fillStyle = 'rgba(247,245,255,0.35)';
+  graphCtx.font = '10px Plus Jakarta Sans, sans-serif';
+  const ticks = logFreqTicksEven(fMin, fMax, 8);
+  for (const hz of ticks) {
+    const x = freqToLogX(hz, fMin, fMax, padL, gw);
+    graphCtx.beginPath();
+    graphCtx.moveTo(x, padT);
+    graphCtx.lineTo(x, padT + gh);
+    graphCtx.stroke();
+    const label = hz >= 1000 ? `${(hz / 1000).toFixed(1)} kHz` : `${Math.round(hz)} Hz`;
+    graphCtx.fillText(label, Math.min(padL + gw - 40, Math.max(padL + 2, x - 18)), h - 12);
+  }
 
   function trace(getter, color, lineWidth) {
     graphCtx.beginPath();
     graphCtx.strokeStyle = color;
     graphCtx.lineWidth = lineWidth;
-    for (let x = 0; x < gw; x++) {
-      const bin = Math.floor((x / (gw - 1)) * (displayBins - 1));
-      const db = getter(bin);
+    for (let xi = 0; xi <= gw; xi++) {
+      const x = padL + xi;
+      const fHz = logXToFreq(x, fMin, fMax, padL, gw);
+      const db = dbAtHz(fHz, getter, sampleRate);
       const y = yForDb(db);
-      if (x === 0) graphCtx.moveTo(padL + x, y);
-      else graphCtx.lineTo(padL + x, y);
+      if (xi === 0) graphCtx.moveTo(x, y);
+      else graphCtx.lineTo(x, y);
     }
     graphCtx.stroke();
   }
@@ -313,10 +365,10 @@ function drawGraph(sampleRate, unit) {
 
   graphCtx.fillStyle = 'rgba(247,245,255,0.5)';
   graphCtx.font = '12px Plus Jakarta Sans, sans-serif';
-  graphCtx.fillText('Hz →', padL + gw - 28, h - 10);
+  graphCtx.fillText('log f →', padL + gw - 36, padT + 12);
 
-  elGraphLow.textContent = `0 Hz`;
-  elGraphHigh.textContent = `${Math.round(nyquist)} Hz`;
+  elGraphLow.textContent = `${Math.round(fMin)} Hz`;
+  elGraphHigh.textContent = `${Math.round(fMax)} Hz`;
 }
 
 function hzToBin(hz, sampleRate) {
@@ -360,8 +412,8 @@ function tick() {
     }
   }
 
-  shiftHeatmap();
-  drawHeatmapColumn(sr);
+  shiftHeatmapDown();
+  drawHeatmapTopRow(sr);
 
   const unit = unitSelect.value;
   drawGraph(sr, unit);

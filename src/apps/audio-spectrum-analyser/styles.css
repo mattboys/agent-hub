@@ -127,6 +127,12 @@
   vertical-align: middle;
 }
 
+.heatmap-wrap canvas {
+  min-height: 220px;
+  max-height: min(50vh, 420px);
+  object-fit: fill;
+}
+
 .canvas-legend {
   display: flex;
   justify-content: space-between;
