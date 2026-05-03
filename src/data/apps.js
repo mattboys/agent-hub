@@ -211,7 +211,7 @@ export const apps = [
       slug: 'audio-spectrum-analyser',
       title: 'Audio Spectrum Analyser',
       blurb:
-        'Microphone FFT with a scrolling spectrum heatmap, live curve plus max and average, and a tunable single-frequency readout in dB or friendlier units.',
+        'Microphone FFT on a log-frequency axis: live curve with max and average, a heatmap history that scrolls downward, and a tunable single-frequency readout in dB or friendlier units.',
       icon: '📊',
       href: 'apps/audio-spectrum-analyser/index.html',
       accent: '#00d4aa'
