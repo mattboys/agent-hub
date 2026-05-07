@@ -220,7 +220,7 @@ export const apps = [
       slug: 'polyrhythm-drum-sequencer',
       title: 'Polyrhythm Drum Sequencer',
       blurb:
-        'Layer loops that share one bar but divide it into different beat counts—set beats-per-bar per track, paint kick/snare/hat steps, and hear them meet only on the downbeat.',
+        'Layer loops that share one bar but divide it into different beat counts—kick, snare, hats, cowbell, FM, and laser zap per track, with beats-per-bar you control.',
       icon: '🥁',
       href: 'apps/polyrhythm-drum-sequencer/index.html',
       accent: '#e8a838'

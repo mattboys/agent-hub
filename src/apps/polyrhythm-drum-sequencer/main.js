@@ -6,8 +6,21 @@ const ACCENT = '#e8a838';
 const LANES = [
   { id: 'kick', label: 'Kick' },
   { id: 'snare', label: 'Snare' },
-  { id: 'hat', label: 'Hi-hat' }
+  { id: 'hat', label: 'Hi-hat' },
+  { id: 'cowbell', label: 'Cowbell' },
+  { id: 'fmHit', label: 'FM hit' },
+  { id: 'zap', label: 'Laser zap' }
 ];
+
+/** Playback gain per lane id (post-buffer). */
+const LANE_GAIN = {
+  kick: 0.52,
+  snare: 0.52,
+  hat: 0.32,
+  cowbell: 0.4,
+  fmHit: 0.38,
+  zap: 0.34
+};
 
 const MIN_BEATS = 2;
 const MAX_BEATS = 24;
@@ -30,7 +43,7 @@ body.appendChild(root);
 let audioCtx = null;
 /** @type {GainNode | null} */
 let masterGain = null;
-/** @type {{ kick: AudioBuffer, snare: AudioBuffer, hat: AudioBuffer } | null} */
+/** @type {Record<string, AudioBuffer> | null} */
 let buffers = null;
 
 const state = {
@@ -118,7 +131,7 @@ toolbar.append(barGroup, volGroup, actions);
 const hint = document.createElement('p');
 hint.className = 'hint';
 hint.textContent =
-  'Every track loops through the same bar duration. Change beats-per-bar to split that bar into thirds, fifths, sevenths, and so on—hits line up again only when the bar repeats.';
+  'Every track loops through the same bar duration. Change beats-per-bar to split that bar into different slices—paint acoustic-style drums plus cowbell and two electronic hits, all meeting again on each downbeat.';
 
 const syncReadout = document.createElement('div');
 syncReadout.className = 'sync-readout';
@@ -214,15 +227,20 @@ function makeEmptyPattern(beats, lanes) {
 
 function seedDemoPattern(track, preset) {
   const { pattern, beats } = track;
+  const ix = Object.fromEntries(LANES.map((l, i) => [l.id, i]));
   if (preset === 'five' && beats === 5) {
-    pattern[0][0] = pattern[0][2] = pattern[0][4] = true;
-    pattern[2][0] = pattern[2][1] = pattern[2][2] = pattern[2][3] = pattern[2][4] = true;
-    pattern[1][3] = true;
+    pattern[ix.kick][0] = pattern[ix.kick][2] = pattern[ix.kick][4] = true;
+    pattern[ix.hat][0] = pattern[ix.hat][1] = pattern[ix.hat][2] = pattern[ix.hat][3] = pattern[ix.hat][4] = true;
+    pattern[ix.snare][3] = true;
+    pattern[ix.cowbell][1] = pattern[ix.cowbell][4] = true;
+    pattern[ix.fmHit][2] = true;
   }
   if (preset === 'seven' && beats === 7) {
-    pattern[0][0] = pattern[0][4] = true;
-    pattern[2][0] = pattern[2][2] = pattern[2][4] = pattern[2][6] = true;
-    pattern[1][2] = pattern[1][5] = true;
+    pattern[ix.kick][0] = pattern[ix.kick][4] = true;
+    pattern[ix.hat][0] = pattern[ix.hat][2] = pattern[ix.hat][4] = pattern[ix.hat][6] = true;
+    pattern[ix.snare][2] = pattern[ix.snare][5] = true;
+    pattern[ix.zap][1] = pattern[ix.zap][3] = pattern[ix.zap][5] = true;
+    pattern[ix.fmHit][4] = true;
   }
 }
 
@@ -268,7 +286,12 @@ function roundTo(n, d) {
 }
 
 async function ensureAudio() {
-  if (audioCtx) return;
+  if (audioCtx) {
+    if (!buffers || LANES.some((l) => !buffers[l.id])) {
+      buffers = buildDrumBuffers(audioCtx);
+    }
+    return;
+  }
   const Ctx = window.AudioContext || window.webkitAudioContext;
   audioCtx = new Ctx();
   masterGain = audioCtx.createGain();
@@ -282,7 +305,10 @@ function buildDrumBuffers(ctx) {
   return {
     kick: renderKick(ctx, sr),
     snare: renderSnare(ctx, sr),
-    hat: renderHat(ctx, sr)
+    hat: renderHat(ctx, sr),
+    cowbell: renderCowbell(ctx, sr),
+    fmHit: renderFmHit(ctx, sr),
+    zap: renderZap(ctx, sr)
   };
 }
 
@@ -345,14 +371,80 @@ function renderHat(ctx, sampleRate) {
   return buf;
 }
 
+/** Metallic cowbell: two inharmonic partials, quick decay. */
+function renderCowbell(ctx, sampleRate) {
+  const dur = 0.14;
+  const frames = Math.floor(dur * sampleRate);
+  const buf = ctx.createBuffer(1, frames, sampleRate);
+  const ch = buf.getChannelData(0);
+  const f1 = 562;
+  const f2 = 845;
+  for (let i = 0; i < frames; i++) {
+    const t = i / sampleRate;
+    const env = Math.exp(-t * 28);
+    const a = Math.sin(2 * Math.PI * f1 * t);
+    const b = Math.sin(2 * Math.PI * f2 * t);
+    const click = Math.sin(2 * Math.PI * 2400 * t) * Math.exp(-t * 120) * 0.12;
+    ch[i] = (a * 0.55 + b * 0.45 + click) * env * 0.9;
+  }
+  return buf;
+}
+
+/** Short FM “plastic” percussion (carrier + decaying mod index). */
+function renderFmHit(ctx, sampleRate) {
+  const dur = 0.12;
+  const frames = Math.floor(dur * sampleRate);
+  const buf = ctx.createBuffer(1, frames, sampleRate);
+  const ch = buf.getChannelData(0);
+  const fc = 220;
+  const ratio = 3.4;
+  for (let i = 0; i < frames; i++) {
+    const t = i / sampleRate;
+    const env = Math.exp(-t * 22);
+    const modI = 6 * Math.exp(-t * 45);
+    const mod = Math.sin(2 * Math.PI * fc * ratio * t) * modI;
+    const car = Math.sin(2 * Math.PI * fc * t + mod);
+    ch[i] = car * env * 0.75;
+  }
+  return buf;
+}
+
+/** Descending chirp + noise burst—electronic laser zap. */
+function renderZap(ctx, sampleRate) {
+  const dur = 0.09;
+  const frames = Math.floor(dur * sampleRate);
+  const buf = ctx.createBuffer(1, frames, sampleRate);
+  const ch = buf.getChannelData(0);
+  let seed = 0xdeadbeef;
+  const rnd = () => {
+    seed ^= seed << 13;
+    seed ^= seed >>> 17;
+    seed ^= seed << 5;
+    return (seed >>> 0) / 2 ** 32 - 0.5;
+  };
+  for (let i = 0; i < frames; i++) {
+    const t = i / sampleRate;
+    const p = t / dur;
+    const f0 = 3200;
+    const f1 = 380;
+    const freq = f0 * (f1 / f0) ** p;
+    const env = Math.exp(-t * 42);
+    const tone = Math.sin(2 * Math.PI * freq * t);
+    const noise = rnd() * 0.35;
+    ch[i] = (tone * 0.65 + noise) * env * 0.85;
+  }
+  return buf;
+}
+
 function playLane(laneIndex, when) {
   if (!audioCtx || !masterGain || !buffers) return;
-  const keys = ['kick', 'snare', 'hat'];
-  const buf = buffers[keys[laneIndex]];
+  const id = LANES[laneIndex].id;
+  const buf = buffers[id];
+  if (!buf) return;
   const src = audioCtx.createBufferSource();
   src.buffer = buf;
   const laneGain = audioCtx.createGain();
-  laneGain.gain.value = laneIndex === 2 ? 0.35 : 0.55;
+  laneGain.gain.value = LANE_GAIN[id] ?? 0.45;
   src.connect(laneGain);
   laneGain.connect(masterGain);
   src.start(when);
@@ -441,9 +533,25 @@ function renderTracksPlayheads() {
   });
 }
 
+function normalizeTrackPattern(track) {
+  const wantLanes = LANES.length;
+  while (track.pattern.length < wantLanes) {
+    track.pattern.push(Array.from({ length: track.beats }, () => false));
+  }
+  if (track.pattern.length > wantLanes) {
+    track.pattern = track.pattern.slice(0, wantLanes);
+  }
+  track.pattern = track.pattern.map((row) => {
+    const next = row.slice(0, track.beats);
+    while (next.length < track.beats) next.push(false);
+    return next;
+  });
+}
+
 function renderTracks() {
   trackListEl.innerHTML = '';
   state.tracks.forEach((track, ti) => {
+    normalizeTrackPattern(track);
     const hue = TRACK_HUES[ti % TRACK_HUES.length];
     const accent = `hsl(${hue} 78% 58%)`;
 
