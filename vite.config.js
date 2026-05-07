@@ -48,7 +48,8 @@ module.exports = defineConfig({
         slopeInterceptCalculator: resolve(__dirname, 'apps/slope-intercept-calculator/index.html'),
         taskTracker: resolve(__dirname, 'apps/task-tracker/index.html'),
         pdfForensicAnalysis: resolve(__dirname, 'apps/pdf-forensic-analysis/index.html'),
-        markdownRepair: resolve(__dirname, 'apps/markdown-repair/index.html')
+        markdownRepair: resolve(__dirname, 'apps/markdown-repair/index.html'),
+        audioSpectrumAnalyser: resolve(__dirname, 'apps/audio-spectrum-analyser/index.html')
       }
     }
   },

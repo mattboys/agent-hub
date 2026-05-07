@@ -206,5 +206,14 @@ export const apps = [
       icon: '🎹',
       href: 'apps/piano-and-stave/index.html',
       accent: '#6f6bff'
+    },
+    {
+      slug: 'audio-spectrum-analyser',
+      title: 'Audio Spectrum Analyser',
+      blurb:
+        'Microphone FFT on a log-frequency axis: live curve with max and average, a heatmap history that scrolls downward, and a tunable single-frequency readout in dB or friendlier units.',
+      icon: '📊',
+      href: 'apps/audio-spectrum-analyser/index.html',
+      accent: '#00d4aa'
     }
 ];
