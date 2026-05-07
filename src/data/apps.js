@@ -215,5 +215,14 @@ export const apps = [
       icon: '📊',
       href: 'apps/audio-spectrum-analyser/index.html',
       accent: '#00d4aa'
+    },
+    {
+      slug: 'polyrhythm-drum-sequencer',
+      title: 'Polyrhythm Drum Sequencer',
+      blurb:
+        'Layer loops that share one bar but divide it into different beat counts—set beats-per-bar per track, paint kick/snare/hat steps, and hear them meet only on the downbeat.',
+      icon: '🥁',
+      href: 'apps/polyrhythm-drum-sequencer/index.html',
+      accent: '#e8a838'
     }
 ];

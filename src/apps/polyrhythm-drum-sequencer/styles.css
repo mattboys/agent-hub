@@ -1,0 +1,262 @@
+.poly-seq {
+  display: grid;
+  gap: 22px;
+}
+
+.poly-seq .toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: flex-end;
+}
+
+.poly-seq .toolbar-group {
+  display: grid;
+  gap: 6px;
+}
+
+.poly-seq .toolbar-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.poly-seq .toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.poly-seq .primary-button,
+.poly-seq .ghost-button {
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.poly-seq .primary-button {
+  background: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.12));
+  color: var(--text);
+}
+
+.poly-seq .primary-button:hover:not(:disabled),
+.poly-seq .primary-button:focus-visible:not(:disabled) {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--accent) 70%, rgba(255, 255, 255, 0.15));
+}
+
+.poly-seq .ghost-button {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.poly-seq .ghost-button:hover:not(:disabled),
+.poly-seq .ghost-button:focus-visible:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.poly-seq button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.poly-seq input[type='number'],
+.poly-seq input[type='range'] {
+  accent-color: var(--accent);
+}
+
+.poly-seq .bar-field {
+  width: 5.5rem;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.poly-seq .hint {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.poly-seq .sync-readout {
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.poly-seq .sync-readout strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.poly-seq .track-list {
+  display: grid;
+  gap: 18px;
+}
+
+.poly-seq .track-card {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(12, 14, 28, 0.55);
+  padding: 16px 18px 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.poly-seq .track-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.poly-seq .track-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.poly-seq .track-swatch {
+  width: 12px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.poly-seq .track-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: flex-end;
+}
+
+.poly-seq .track-controls label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: grid;
+  gap: 4px;
+}
+
+.poly-seq .beats-input {
+  width: 4rem;
+}
+
+.poly-seq .remove-track {
+  margin-left: auto;
+}
+
+.poly-seq .lane-labels {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 8px 10px;
+  align-items: center;
+}
+
+.poly-seq .lane-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: right;
+  padding-right: 4px;
+}
+
+.poly-seq .lane-steps {
+  display: grid;
+  gap: 6px;
+  align-items: center;
+}
+
+.poly-seq .step-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(28px, 1fr);
+  gap: 5px;
+}
+
+.poly-seq .step-cell {
+  aspect-ratio: 1;
+  min-height: 32px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  padding: 0;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.poly-seq .step-cell:hover,
+.poly-seq .step-cell:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--track-accent, var(--accent)) 55%, rgba(255, 255, 255, 0.2));
+}
+
+.poly-seq .step-cell.on {
+  background: color-mix(in srgb, var(--track-accent, var(--accent)) 42%, rgba(255, 255, 255, 0.08));
+  border-color: color-mix(in srgb, var(--track-accent, var(--accent)) 65%, transparent);
+}
+
+.poly-seq .step-cell.playhead {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--track-accent, var(--accent)) 75%, transparent);
+}
+
+.poly-seq .libraries {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.poly-seq .libraries summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.poly-seq .libraries ul {
+  margin: 12px 0 0;
+  padding-left: 1.2rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  font-size: 0.9rem;
+}
+
+.poly-seq .libraries a {
+  color: color-mix(in srgb, var(--accent) 75%, var(--text));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.poly-seq .volume-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.poly-seq .volume-row input[type='range'] {
+  width: min(220px, 100%);
+}
