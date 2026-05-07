@@ -20,11 +20,12 @@ function createAppCard(app) {
   card.href = app.href;
   card.dataset.slug = app.slug;
   card.setAttribute('style', `--accent:${app.accent};`);
+  card.setAttribute('aria-label', `${app.title}. ${app.blurb}`);
   card.innerHTML = `
     <span class="app-icon" aria-hidden="true">${app.icon}</span>
     <span class="app-title">${app.title}</span>
     <span class="app-blurb">${app.blurb}</span>
-    <span class="app-link">Launch ↗</span>
+    <span class="app-link" aria-hidden="true"></span>
   `;
   return card;
 }

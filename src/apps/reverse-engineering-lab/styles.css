@@ -11,9 +11,13 @@
 }
 
 .panel {
-  border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(150deg, rgba(25, 21, 46, 0.92), rgba(15, 12, 30, 0.86));
+  border-radius: 0;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.96) inset,
+    0 2px 6px rgba(16, 16, 28, 0.05),
+    0 12px 28px rgba(16, 16, 28, 0.07);
   padding: clamp(22px, 3.5vw, 36px);
   display: grid;
   gap: clamp(18px, 2.5vw, 28px);
@@ -33,7 +37,7 @@
 
 .panel-header p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -47,20 +51,20 @@
   font-size: 0.78rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.52);
+  color: var(--text-muted);
   font-weight: 700;
 }
 
 .input-label textarea {
   min-height: 280px;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0;
+  border: 1px solid var(--border-soft);
   padding: 18px 20px;
   resize: vertical;
   font-size: 0.95rem;
   line-height: 1.5;
   font-family: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', monospace;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--text);
   background: rgba(6, 8, 20, 0.7);
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
@@ -79,9 +83,9 @@
 
 .controls button,
 .controls select {
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(17, 18, 38, 0.72);
+  border-radius: 0;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
   color: inherit;
   padding: 10px 18px;
   font-weight: 600;
@@ -96,12 +100,12 @@
 .controls select:focus-visible {
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--accent) 32%, rgba(255, 255, 255, 0.2));
-  background: color-mix(in srgb, var(--accent) 18%, rgba(17, 18, 38, 0.82));
+  background: color-mix(in srgb, var(--accent) 18%, #f6f6f9);
   outline: none;
 }
 
 .controls button.primary {
-  background: color-mix(in srgb, var(--accent) 45%, rgba(255, 255, 255, 0.16));
+  background: color-mix(in srgb, var(--accent) 45%, var(--border-soft));
   border-color: color-mix(in srgb, var(--accent) 60%, rgba(255, 255, 255, 0.4));
 }
 
@@ -128,18 +132,18 @@
 
 .status-line {
   padding: 12px 16px;
-  border-radius: 16px;
+  border-radius: 0;
   border: 1px dashed rgba(255, 255, 255, 0.18);
   background: rgba(9, 11, 24, 0.65);
   font-size: 0.9rem;
   letter-spacing: 0.01em;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--text-muted);
 }
 
 .results-meta {
   margin: 0;
   font-size: 0.92rem;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--text-muted);
 }
 
 .results-list {
@@ -150,21 +154,21 @@
 .empty-state {
   margin: 0;
   padding: 18px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  border: 1px solid var(--border-soft);
   background: rgba(8, 9, 20, 0.72);
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text);
 }
 
 .result-card {
   display: grid;
   gap: 14px;
   padding: clamp(16px, 2.5vw, 26px);
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  border: 1px solid rgba(18, 18, 30, 0.06);
   background: rgba(10, 12, 28, 0.8);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  box-shadow: inset 0 0 0 1px rgba(18, 18, 30, 0.03);
   position: relative;
   overflow: hidden;
 }
@@ -184,7 +188,7 @@
 }
 
 .result-card[data-severity='success'] {
-  border-color: color-mix(in srgb, var(--accent) 38%, rgba(255, 255, 255, 0.12));
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border-soft));
 }
 
 .result-card[data-severity='warn'] {
@@ -192,7 +196,7 @@
 }
 
 .result-card[data-severity='neutral'] {
-  border-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(18, 18, 30, 0.05);
 }
 
 .result-header {
@@ -211,8 +215,8 @@
 .confidence {
   font-size: 0.85rem;
   padding: 2px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0;
+  background: var(--border-soft);
   border: 1px solid rgba(255, 255, 255, 0.18);
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -220,7 +224,7 @@
 
 .result-summary {
   margin: 0;
-  color: rgba(255, 255, 255, 0.76);
+  color: var(--text);
   line-height: 1.5;
 }
 
@@ -229,7 +233,7 @@
   padding-left: 18px;
   display: grid;
   gap: 4px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-muted);
   font-size: 0.92rem;
 }
 
@@ -244,13 +248,13 @@
   font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.48);
+  color: var(--text-muted);
 }
 
 .result-details dd {
   margin: 4px 0 0;
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--text);
 }
 
 .preview {
@@ -262,18 +266,18 @@
   font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.52);
+  color: var(--text-muted);
 }
 
 .preview pre,
 .preview textarea {
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  border: 1px solid rgba(18, 18, 30, 0.06);
   background: rgba(0, 0, 0, 0.32);
   padding: 14px;
   font-family: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', monospace;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--text);
   line-height: 1.5;
   resize: vertical;
   max-height: 360px;
@@ -290,9 +294,9 @@
 }
 
 .result-actions button {
-  border-radius: 999px;
+  border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(18, 18, 30, 0.06);
   color: inherit;
   padding: 8px 16px;
   font-size: 0.9rem;
@@ -305,7 +309,7 @@
 .result-actions button:hover,
 .result-actions button:focus-visible {
   transform: translateY(-1px);
-  background: color-mix(in srgb, var(--accent) 24%, rgba(255, 255, 255, 0.12));
+  background: color-mix(in srgb, var(--accent) 24%, var(--border-soft));
   border-color: color-mix(in srgb, var(--accent) 40%, rgba(255, 255, 255, 0.22));
   outline: none;
 }
@@ -322,12 +326,12 @@
   transform: translateX(-50%);
   white-space: nowrap;
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.18);
   font-size: 0.8rem;
   letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--text);
   opacity: 0;
   pointer-events: none;
   animation: toast-pop 1.5s ease;
