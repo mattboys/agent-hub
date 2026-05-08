@@ -21,7 +21,13 @@ export function createAppShell({ title, description, accent, status }) {
   const backLink = document.createElement('a');
   backLink.href = '../../';
   backLink.className = 'back-link';
-  backLink.textContent = '← Back to the hub';
+  backLink.setAttribute('aria-label', 'Back to the hub');
+  backLink.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M14 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter"/>
+    </svg>
+    <span class="visually-hidden">Back to the hub</span>
+  `;
   header.appendChild(backLink);
 
   const h1 = document.createElement('h1');

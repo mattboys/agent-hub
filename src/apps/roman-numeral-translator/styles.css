@@ -26,11 +26,11 @@
   display: grid;
   gap: 18px;
   padding: clamp(20px, 3vw, 26px);
-  border-radius: 26px;
-  background: rgba(11, 14, 27, 0.74);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius, 6px);
+  background: #ffffff;
+  border: 1px solid var(--border-soft);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(18, 18, 30, 0.05),
     0 20px 35px rgba(12, 7, 2, 0.35);
   overflow: hidden;
 }
@@ -40,16 +40,16 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at 10% -20%, color-mix(in srgb, var(--accent) 65%, transparent) 0%, transparent 55%);
+  background: transparent;
   opacity: 0.5;
 }
 
 .translator-card.history-card::before {
-  background: radial-gradient(circle at -10% 10%, color-mix(in srgb, var(--accent) 40%, transparent) 0%, transparent 60%);
+  background: transparent;
 }
 
 .translator-card.reference-card::before {
-  background: radial-gradient(circle at 110% 0%, color-mix(in srgb, var(--accent) 50%, transparent) 0%, transparent 60%);
+  background: transparent;
 }
 
 .card-header {
@@ -63,7 +63,7 @@
   font-size: 0.78rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--text-muted);
 }
 
 .card-header h2 {
@@ -74,7 +74,7 @@
 
 .card-header p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.6;
 }
@@ -95,16 +95,16 @@
   font-weight: 600;
   font-size: 0.95rem;
   letter-spacing: 0.01em;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text);
 }
 
 .field-input {
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius, 6px);
+  border: 1px solid var(--border-soft);
   background: rgba(7, 9, 18, 0.78);
   padding: 14px 16px;
   font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.94);
+  color: var(--text);
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
@@ -122,7 +122,7 @@
 .field-hint {
   margin: 0;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--text-muted);
 }
 
 .primary-btn {
@@ -131,12 +131,12 @@
   align-items: center;
   gap: 8px;
   padding: 12px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius, 6px);
   border: none;
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 75%, rgba(255, 255, 255, 0.1)), color-mix(in srgb, var(--accent) 55%, rgba(0, 0, 0, 0.2)));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 75%, var(--border-soft)), color-mix(in srgb, var(--accent) 55%, rgba(18, 18, 30, 0.08)));
   color: rgba(17, 18, 26, 0.95);
   cursor: pointer;
   transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
@@ -153,7 +153,7 @@
 .field-error {
   margin: 0;
   padding: 10px 12px;
-  border-radius: 14px;
+  border-radius: var(--radius, 6px);
   font-size: 0.88rem;
   line-height: 1.5;
   color: rgba(255, 225, 232, 0.92);
@@ -166,9 +166,9 @@
   display: grid;
   gap: 12px;
   padding: 18px 18px 16px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius, 6px);
+  background: rgba(18, 18, 30, 0.05);
+  border: 1px solid var(--border-soft);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
   z-index: 1;
 }
@@ -177,7 +177,7 @@
   border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.15));
   box-shadow:
     0 20px 30px rgba(240, 140, 74, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    inset 0 1px 0 var(--border-soft);
 }
 
 .result-block[data-state='error'] {
@@ -189,7 +189,7 @@
   font-size: 0.85rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-muted);
 }
 
 .result-value {
@@ -202,7 +202,7 @@
   display: grid;
   gap: 10px;
   padding-top: 4px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(18, 18, 30, 0.06);
 }
 
 .breakdown-wrapper[data-state='empty'] {
@@ -213,7 +213,7 @@
   font-size: 0.82rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-muted);
 }
 
 .breakdown-list {
@@ -229,12 +229,12 @@
   display: inline-flex;
   align-items: baseline;
   gap: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius, 6px);
   padding: 8px 12px;
   background: rgba(9, 12, 24, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--border-soft);
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.86);
+  color: var(--text);
 }
 
 .chip-symbol {
@@ -244,7 +244,7 @@
 
 .chip-value {
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--text);
 }
 
 .history-list {
@@ -267,9 +267,9 @@
   gap: 12px;
   align-items: center;
   padding: 12px 14px;
-  border-radius: 16px;
+  border-radius: var(--radius, 6px);
   background: rgba(8, 11, 22, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-soft);
 }
 
 .history-value {
@@ -280,7 +280,7 @@
 }
 
 .history-value.from {
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--text);
 }
 
 .history-value.to {
@@ -290,7 +290,7 @@
 .history-arrow {
   justify-self: center;
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-muted);
 }
 
 .history-meta {
@@ -298,17 +298,17 @@
   font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-muted);
 }
 
 .empty-state {
   margin: 0;
   padding: 12px 14px;
-  border-radius: 16px;
+  border-radius: var(--radius, 6px);
   background: rgba(12, 14, 26, 0.65);
   border: 1px dashed rgba(255, 255, 255, 0.18);
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--text);
   z-index: 1;
 }
 
@@ -329,9 +329,9 @@
   display: grid;
   gap: 12px;
   padding: 14px;
-  border-radius: 18px;
+  border-radius: var(--radius, 6px);
   background: rgba(8, 10, 20, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-soft);
 }
 
 .reference-column h3 {
@@ -354,9 +354,9 @@
   align-items: center;
   font-size: 0.95rem;
   padding: 8px 10px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius, 6px);
+  background: rgba(18, 18, 30, 0.05);
+  border: 1px solid var(--border-soft);
 }
 
 .ref-roman {
@@ -365,7 +365,7 @@
 }
 
 .ref-value {
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -373,7 +373,7 @@
   position: relative;
   margin: 0;
   padding: 12px 0 0;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-muted);
   font-size: 0.88rem;
   line-height: 1.6;
   z-index: 1;

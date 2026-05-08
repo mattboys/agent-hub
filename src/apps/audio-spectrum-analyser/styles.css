@@ -1,7 +1,7 @@
 :root {
-  --spec-panel: rgba(12, 14, 28, 0.55);
-  --spec-border: rgba(255, 255, 255, 0.1);
-  --spec-muted: rgba(247, 245, 255, 0.65);
+  --spec-panel: #f6f6f9;
+  --spec-border: var(--border-soft);
+  --spec-muted: rgba(20, 20, 26, 0.55);
 }
 
 .spectrum-app {
@@ -34,9 +34,9 @@
   font: inherit;
   font-size: 0.9rem;
   padding: 8px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--spec-border);
-  background: rgba(0, 0, 0, 0.35);
+  background: #ffffff;
   color: var(--text);
   min-width: 0;
 }
@@ -51,7 +51,7 @@
   font-size: 0.9rem;
   font-weight: 600;
   padding: 10px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius, 6px);
   cursor: pointer;
   border: 1px solid transparent;
   transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
@@ -59,7 +59,7 @@
 
 .primary-button {
   background: color-mix(in srgb, var(--accent) 85%, #fff 15%);
-  color: #0c0d1d;
+  color: var(--text);
   border-color: color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
@@ -93,7 +93,7 @@
 .panel-block {
   background: var(--spec-panel);
   border: 1px solid var(--spec-border);
-  border-radius: 20px;
+  border-radius: var(--radius, 6px);
   padding: 16px;
   display: grid;
   gap: 10px;
@@ -114,9 +114,9 @@
 
 .canvas-wrap {
   position: relative;
-  border-radius: 14px;
+  border-radius: var(--radius, 6px);
   overflow: hidden;
-  background: #05060d;
+  background: #eef1f7;
   border: 1px solid var(--spec-border);
 }
 
@@ -149,8 +149,8 @@
 
 .readout-card {
   padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius, 6px);
+  background: #ffffff;
   border: 1px solid var(--spec-border);
 }
 

@@ -1,7 +1,7 @@
 :root {
   --panel-bg: #ffffff;
   --panel-border: rgba(15, 15, 35, 0.1);
-  --panel-shadow: 0 20px 40px rgba(19, 11, 46, 0.08);
+  --panel-shadow: var(--shadow-deep);
   --staff-gap: 20px;
 }
 
@@ -21,7 +21,7 @@
 .panel {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 24px;
+  border-radius: var(--radius, 6px);
   padding: 28px;
   box-shadow: var(--panel-shadow);
   flex: 1;
@@ -50,7 +50,7 @@
 
 .ghost-button {
   border: 1px solid rgba(15, 15, 35, 0.15);
-  border-radius: 999px;
+  border-radius: var(--radius, 6px);
   padding: 8px 16px;
   font-size: 0.9rem;
   background: transparent;
@@ -65,8 +65,8 @@
 
 .staff {
   position: relative;
-  border-radius: 20px;
-  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.65), #fdfbff);
+  border-radius: var(--radius, 6px);
+  background: transparent;
   min-height: 260px;
   overflow: hidden;
 }
@@ -114,7 +114,7 @@
   border-radius: 50% / 55%;
   transform: rotate(-15deg);
   background: var(--accent, #6f6bff);
-  box-shadow: inset -2px -1px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: inset -1px -1px 0 rgba(18, 18, 30, 0.2);
 }
 
 .notation-note .accidental {
@@ -147,7 +147,7 @@
 
 .key-bed {
   position: relative;
-  border-radius: 18px;
+  border-radius: var(--radius, 6px);
   background: linear-gradient(145deg, #f5f4ff, #ffffff);
   padding: 16px;
   box-shadow: inset 0 0 0 1px rgba(15, 15, 35, 0.08);
@@ -211,9 +211,9 @@
   position: absolute;
   border-radius: 0 0 6px 6px;
   height: 100%;
-  background: linear-gradient(180deg, #1c1c28, #050507);
+  background: linear-gradient(180deg, #3a3a48, #2a2a34);
   color: #f8f8ff;
-  box-shadow: 0 12px 18px rgba(5, 5, 15, 0.45);
+  box-shadow: 0 2px 6px rgba(16, 16, 28, 0.2);
   pointer-events: auto;
 }
 

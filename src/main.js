@@ -9,7 +9,7 @@ function createHero() {
   hero.innerHTML = `
     <span class="hero-eyebrow">Matt Presents</span>
     <h1>Vibe-Coded App Hub</h1>
-    <p>Micro web experiments with big feelings. Click any card to open a focused tool in a new page.</p>
+    <p>Small, focused web tools I ship as static pages—open a card to try one; each runs entirely in your browser.</p>
   `;
   return hero;
 }
@@ -20,11 +20,11 @@ function createAppCard(app) {
   card.href = app.href;
   card.dataset.slug = app.slug;
   card.setAttribute('style', `--accent:${app.accent};`);
+  card.setAttribute('aria-label', `${app.title}. ${app.blurb}`);
   card.innerHTML = `
     <span class="app-icon" aria-hidden="true">${app.icon}</span>
     <span class="app-title">${app.title}</span>
     <span class="app-blurb">${app.blurb}</span>
-    <span class="app-link">Launch ↗</span>
   `;
   return card;
 }
@@ -46,51 +46,41 @@ function createAbout() {
     <div class="about-card">
       <h2>What is this place?</h2>
       <p>
-        This hub is a living collection of pocket-sized webapps built by Matt and delivered via GitHub Pages.
-        Each tool runs entirely in your browser—no accounts, no tracking, just playful utility.
+        This is my living gallery of pocket-sized web apps on GitHub Pages—no accounts, no tracking, just the tool in front of you.
       </p>
       <p>
-        Built with AI assistance and deployed automatically. When ideas are submitted, AI agents write the code, and updates go live within minutes.
+        I use AI-assisted workflows to turn ideas into code quickly; everything here is open and deployed automatically.
       </p>
-      <p class="about-meta">New experiments launch regularly—check back often or submit your own idea!</p>
+      <p class="about-meta">New experiments appear often—drop by again or suggest something you’d like built.</p>
+
+      <h3 class="about-subheading">From idea to live app</h3>
+      <ol class="timeline-steps">
+        <li>
+          <span class="timeline-duration">Step 1</span>
+          <span class="timeline-description">
+            You send an idea through <a href="https://cursor.com/agents" target="_blank" rel="noopener noreferrer">Cursor Agents</a>
+            or a <a href="https://github.com/mattboys/agent-hub/issues" target="_blank" rel="noopener noreferrer">GitHub issue</a>.
+          </span>
+        </li>
+        <li>
+          <span class="timeline-duration">Step 2</span>
+          <span class="timeline-description">
+            Cloud agents run the work and open a pull request. GitHub Actions builds a preview of the site and shares a link so you can verify the change; when it looks right, I merge into <strong>main</strong>.
+          </span>
+        </li>
+        <li>
+          <span class="timeline-duration">Step 3</span>
+          <span class="timeline-description">
+            The production site updates on <a href="https://mattboys.github.io/agent-hub/" target="_blank" rel="noopener noreferrer">GitHub Pages</a>—usually within minutes of merge.
+          </span>
+        </li>
+      </ol>
+      <p class="timeline-total">
+        <span class="timeline-total-label">Typical turnaround:</span>
+        minutes from idea to preview; merge when ready.
+      </p>
     </div>
   `;
-  return section;
-}
-
-function createTimeline() {
-  const section = document.createElement('section');
-  section.className = 'timeline';
-  section.innerHTML = `
-      <div class="timeline-card">
-        <h2>From Idea to Live App</h2>
-        <ol class="timeline-steps">
-          <li>
-            <span class="timeline-duration">30s</span>
-            <span class="timeline-description">
-              User submits an idea via <a href="https://cursor.com/agents" target="_blank" rel="noopener noreferrer">Cursor Agents</a>
-              or <a href="https://github.com/mattboys/agent-hub/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>.
-            </span>
-          </li>
-          <li>
-            <span class="timeline-duration">60s</span>
-            <span class="timeline-description">AI agents implement the request and open a pull request with the code changes.</span>
-          </li>
-          <li>
-            <span class="timeline-duration">5s</span>
-            <span class="timeline-description">The site admin reviews and approves the update.</span>
-          </li>
-          <li>
-            <span class="timeline-duration">40s</span>
-            <span class="timeline-description">GitHub Actions spins up a fresh VM to rebuild the site.</span>
-          </li>
-        </ol>
-        <p class="timeline-total">
-          <span class="timeline-total-label">Total:</span>
-          2min 15s — changes go live on <a href="https://mattboys.github.io/agent-hub/" target="_blank" rel="noopener noreferrer">GitHub Pages</a>.
-        </p>
-      </div>
-    `;
   return section;
 }
 
@@ -104,7 +94,6 @@ function init() {
 
   page.appendChild(createHero());
   page.appendChild(createAppGrid());
-  page.appendChild(createTimeline());
   page.appendChild(createAbout());
 
   root.innerHTML = '';
