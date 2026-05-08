@@ -44,11 +44,11 @@
 .measurement-card {
   background: rgba(14, 16, 32, 0.7);
   border: 1px solid rgba(18, 18, 30, 0.06);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   padding: 18px;
   display: grid;
   gap: 14px;
-  box-shadow: 0 22px 40px -34px rgba(0, 0, 0, 0.65);
+  box-shadow: var(--shadow-deep);
 }
 
 .card-header h3 {
@@ -78,9 +78,9 @@
 .unit-select {
   min-width: 96px;
   padding: 8px 10px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(18, 18, 30, 0.05);
   color: inherit;
   font-size: 0.95rem;
 }
@@ -115,7 +115,7 @@
   border: 1px solid var(--border-soft);
   background: rgba(18, 18, 30, 0.06);
   color: inherit;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   padding: 10px 16px;
   font-weight: 600;
   cursor: pointer;
@@ -137,7 +137,7 @@
 
 .calibration-line {
   height: 6px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.25), var(--accent));
   position: relative;
 }
@@ -188,9 +188,9 @@ input[type='number'] {
   font-family: inherit;
   font-size: 0.95rem;
   padding: 8px 10px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(18, 18, 30, 0.04);
   color: inherit;
   width: 100%;
 }
@@ -252,7 +252,7 @@ input[type='range'] {
 .tool-preview {
   position: relative;
   min-height: 180px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px dashed var(--border-soft);
   background: rgba(8, 10, 22, 0.7);
   overflow: auto;
@@ -279,7 +279,7 @@ input[type='range'] {
   z-index: 1;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(92, 247, 193, 0.5));
   border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 14px 24px -18px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-deep);
 }
 
 .shape-circle {
@@ -299,7 +299,7 @@ input[type='range'] {
 }
 
 .shape-line {
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.35), var(--accent));
 }
 

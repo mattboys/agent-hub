@@ -8,7 +8,7 @@
   display: grid;
   gap: 18px;
   padding: clamp(20px, 3vw, 28px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: #ffffff;
   border: 1px solid var(--border-soft);
   box-shadow:
@@ -58,7 +58,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid rgba(255, 255, 255, 0.22);
   background: rgba(18, 18, 30, 0.05);
   color: var(--text);
@@ -81,7 +81,7 @@
   border-color: color-mix(in srgb, var(--accent) 70%, rgba(255, 255, 255, 0.22));
   background: color-mix(in srgb, var(--accent) 22%, rgba(18, 18, 30, 0.06));
   transform: translateY(-1px);
-  box-shadow: 0 12px 20px rgba(9, 12, 22, 0.4);
+  box-shadow: var(--shadow-deep);
 }
 
 .tcs-btn:disabled {
@@ -106,7 +106,7 @@
   position: relative;
   z-index: 1;
   min-height: clamp(220px, 30vh, 360px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: #f6f6f9;
   padding: 16px 18px;
@@ -149,8 +149,8 @@
 .tcs-status {
   justify-self: stretch;
   padding: 12px 16px;
-  border-radius: 0;
-  background: rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius, 6px);
+  background: rgba(18, 18, 30, 0.06);
   border: 1px solid rgba(18, 18, 30, 0.06);
   font-size: 0.95rem;
   color: var(--text);

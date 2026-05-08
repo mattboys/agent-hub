@@ -33,7 +33,7 @@
 .dot-button {
   background: rgba(18, 18, 30, 0.06);
   border: 1px solid var(--border-soft);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   color: var(--text);
   padding: 10px 20px;
   font-weight: 600;
@@ -47,7 +47,7 @@
   outline: none;
   border-color: color-mix(in srgb, var(--accent) 70%, rgba(255, 255, 255, 0.3));
   background: var(--border-soft);
-  box-shadow: 0 12px 24px rgba(6, 9, 18, 0.35);
+  box-shadow: var(--shadow-deep);
   transform: translateY(-1px);
 }
 
@@ -66,7 +66,7 @@
 
 .dot-stat-card {
   padding: 18px 20px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(18, 18, 30, 0.05);
   border: 1px solid var(--border-soft);
   display: grid;
@@ -89,7 +89,7 @@
 
 .dot-stage {
   position: relative;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--dot-border);
   background: transparent;
   padding: clamp(12px, 2vw, 18px);
@@ -102,7 +102,7 @@
   content: '';
   position: absolute;
   inset: 10px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   pointer-events: none;
   border: 1px dashed rgba(18, 18, 30, 0.05);
 }
@@ -110,7 +110,7 @@
 .dot-stage-message {
   position: absolute;
   inset: clamp(12px, 2vw, 20px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: #f6f6f9;
   border: 1px dashed var(--border-soft);
   display: flex;
@@ -141,7 +141,7 @@
   width: 100%;
   height: clamp(360px, 58vh, 620px);
   display: block;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   overflow: hidden;
   background-image:
     linear-gradient(transparent 95%, rgba(18, 18, 30, 0.04) 95%),

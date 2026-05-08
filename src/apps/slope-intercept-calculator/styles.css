@@ -14,7 +14,7 @@
   display: grid;
   gap: 16px;
   padding: clamp(18px, 3vw, 24px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: #ffffff;
   border: 1px solid var(--border-soft);
   box-shadow:
@@ -68,7 +68,7 @@
 }
 
 .point-fieldset {
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: #f6f6f9;
   padding: 14px;
@@ -103,7 +103,7 @@
 }
 
 .field-input {
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: #f6f6f9;
   padding: 10px 12px;
@@ -136,7 +136,7 @@
 
 .action-button {
   border: 1px solid var(--border-soft);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   padding: 10px 14px;
   background: rgba(18, 18, 30, 0.06);
   color: var(--text);
@@ -180,7 +180,7 @@
 
 .result-item {
   padding: 12px 14px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: #f6f6f9;
   display: grid;
@@ -201,7 +201,7 @@
 
 .equation-block {
   padding: 14px 16px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: #f6f6f9;
   display: grid;

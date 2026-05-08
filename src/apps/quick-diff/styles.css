@@ -21,7 +21,7 @@
   display: grid;
   gap: 12px;
   padding: clamp(12px, 2vw, 16px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: #ffffff;
   border: 1px solid var(--border-soft);
   box-shadow:
@@ -66,7 +66,7 @@
   position: relative;
   z-index: 1;
   min-height: clamp(200px, 25vh, 280px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: #f6f6f9;
   padding: 16px 18px;
@@ -110,7 +110,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid rgba(255, 255, 255, 0.24);
   background: rgba(18, 18, 30, 0.04);
   color: var(--text);
@@ -128,7 +128,7 @@
   border-color: color-mix(in srgb, var(--accent) 75%, rgba(255, 255, 255, 0.22));
   background: rgba(18, 18, 30, 0.06);
   transform: translateY(-1px);
-  box-shadow: 0 12px 20px rgba(9, 12, 22, 0.4);
+  box-shadow: var(--shadow-deep);
 }
 
 .diff-summary {
@@ -140,7 +140,7 @@
 .diff-summary .diff-empty {
   margin: 0;
   padding: 18px 20px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(18, 18, 30, 0.05);
   border: 1px dashed var(--border-soft);
   color: var(--text-muted);
@@ -166,7 +166,7 @@
 .summary-card {
   position: relative;
   padding: 18px 20px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(18, 18, 30, 0.05);
   border: 1px solid var(--border-soft);
   display: grid;
@@ -205,7 +205,7 @@
 .diff-results .diff-empty {
   margin: 0;
   padding: 18px 20px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px dashed var(--border-soft);
   background: rgba(18, 18, 30, 0.05);
   color: var(--text);
@@ -221,7 +221,7 @@
   position: relative;
   z-index: 1;
   padding: 18px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: #f6f6f9;
   border: 1px solid var(--border-soft);
   font-family: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
@@ -244,7 +244,7 @@
 .pane-content::-webkit-scrollbar-thumb,
 .diff-input::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.18);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
 }
 
 .diff-pane-grid {
@@ -275,7 +275,7 @@
 .pane-content {
   position: relative;
   z-index: 1;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: #f6f6f9;
   padding: 18px;

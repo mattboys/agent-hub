@@ -19,7 +19,7 @@
   display: grid;
   gap: 16px;
   padding: clamp(22px, 3vw, 32px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(8, 11, 24, 0.88);
   border: 1px solid var(--border-soft);
   box-shadow:
@@ -86,7 +86,7 @@
 
 .telemetry-grid article {
   padding: 16px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: rgba(3, 5, 14, 0.85);
   display: grid;
@@ -122,7 +122,7 @@
   position: relative;
   z-index: 1;
   padding: 18px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: rgba(3, 5, 14, 0.9);
   display: grid;
@@ -162,22 +162,22 @@
   width: 100%;
   border: none;
   padding: clamp(18px, 3vw, 28px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, #111) 0%, rgba(18, 18, 30, 0.05) 100%);
-  color: #05060d;
+  color: var(--text);
   font-size: clamp(1.05rem, 2.4vw, 1.2rem);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 25px 45px rgba(5, 7, 17, 0.55);
+  box-shadow: var(--shadow-deep);
   transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
 .transmit-button:active,
 .morse-card[data-active='true'] .transmit-button {
   transform: translateY(2px);
-  box-shadow: 0 15px 26px rgba(5, 7, 17, 0.4);
+  box-shadow: var(--shadow-raised);
 }
 
 .micro-hint {
@@ -203,7 +203,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid rgba(255, 255, 255, 0.24);
   background: rgba(18, 18, 30, 0.04);
   padding: 10px 18px;
@@ -236,7 +236,7 @@
 .level-bar {
   position: relative;
   height: 12px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(18, 18, 30, 0.06);
   overflow: hidden;
 }
@@ -274,7 +274,7 @@
 .encoder-card textarea {
   position: relative;
   z-index: 1;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: rgba(6, 8, 18, 0.92);
   padding: 14px 16px;
@@ -291,7 +291,7 @@
   z-index: 1;
   margin: 0;
   padding: 14px 16px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px dashed rgba(255, 255, 255, 0.18);
   background: rgba(18, 18, 30, 0.04);
   font-size: 1rem;
@@ -324,7 +324,7 @@
   z-index: 1;
   margin: 0;
   padding: 16px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: rgba(6, 8, 18, 0.92);
   min-height: 120px;

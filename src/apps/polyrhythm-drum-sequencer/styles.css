@@ -37,7 +37,7 @@
   font-size: 0.95rem;
   font-weight: 600;
   padding: 10px 18px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   cursor: pointer;
   transition: background 160ms ease, transform 160ms ease;
@@ -77,9 +77,9 @@
 .poly-seq .bar-field {
   width: 5.5rem;
   padding: 8px 10px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(18, 18, 30, 0.05);
   color: var(--text);
   font-family: inherit;
   font-size: 0.95rem;
@@ -94,8 +94,8 @@
 
 .poly-seq .sync-readout {
   padding: 12px 16px;
-  border-radius: 0;
-  background: rgba(0, 0, 0, 0.22);
+  border-radius: var(--radius, 6px);
+  background: rgba(18, 18, 30, 0.05);
   border: 1px solid rgba(18, 18, 30, 0.06);
   font-size: 0.9rem;
   line-height: 1.55;
@@ -113,7 +113,7 @@
 }
 
 .poly-seq .track-card {
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: #f6f6f9;
   padding: 16px 18px 18px;
@@ -200,7 +200,7 @@
 .poly-seq .step-cell {
   aspect-ratio: 1;
   min-height: 32px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: rgba(18, 18, 30, 0.04);
   cursor: pointer;
@@ -224,7 +224,7 @@
 }
 
 .poly-seq .libraries {
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid rgba(18, 18, 30, 0.06);
   padding: 14px 18px;
   background: rgba(18, 18, 30, 0.04);

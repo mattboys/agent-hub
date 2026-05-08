@@ -29,7 +29,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-raised);
 }
 
 .stat-label {
@@ -124,7 +124,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(18, 18, 30, 0.05);
   border: 1px solid var(--border-soft);
   font-size: 0.85rem;
@@ -211,7 +211,7 @@
 
 .primary-btn {
   background: color-mix(in srgb, var(--accent) 75%, var(--border-soft));
-  color: #0f0f1a;
+  color: var(--text);
 }
 
 .primary-btn:hover {
@@ -261,7 +261,7 @@
 
 .kanban-view::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
 }
 
 .kanban-user-column {
@@ -327,11 +327,11 @@
   gap: 6px;
   cursor: grab;
   transition: box-shadow 140ms ease, transform 140ms ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-raised);
 }
 
 .ticket-card:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-raised);
 }
 
 .ticket-card.dragging {
@@ -406,7 +406,7 @@
 
 .backlog-assign {
   padding: 8px 12px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   background: rgba(2, 4, 14, 0.6);
   color: #fff;
@@ -418,7 +418,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(22, 22, 30, 0.38);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -434,7 +434,7 @@
   padding: 28px;
   max-width: 400px;
   width: 100%;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-deep);
   display: grid;
   gap: 16px;
 }

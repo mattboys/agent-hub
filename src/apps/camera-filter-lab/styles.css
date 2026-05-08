@@ -1,7 +1,7 @@
 :root {
-  --filtercam-panel-bg: rgba(6, 8, 15, 0.85);
-  --filtercam-border: rgba(18, 18, 30, 0.06);
-  --filtercam-soft-border: rgba(18, 18, 30, 0.05);
+  --filtercam-panel-bg: #ffffff;
+  --filtercam-border: rgba(18, 18, 30, 0.12);
+  --filtercam-soft-border: rgba(18, 18, 30, 0.08);
 }
 
 .filtercam {
@@ -19,9 +19,9 @@
 .filtercam-panel {
   background: var(--filtercam-panel-bg);
   border: 1px solid var(--filtercam-border);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   padding: 1.5rem;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-deep);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -42,11 +42,11 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   overflow: hidden;
   background: transparent;
   border: 1px solid rgba(18, 18, 30, 0.06);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-deep);
 }
 
 .filtercam-video {
@@ -169,7 +169,7 @@
 
 .filtercam-current {
   border: 1px solid var(--filtercam-soft-border);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   padding: 1.1rem;
   background: rgba(18, 18, 30, 0.03);
 }
@@ -211,7 +211,7 @@
 .filtercam-tag {
   font-size: 0.78rem;
   padding: 0.25rem 0.6rem;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(18, 18, 30, 0.06);
   border: 1px solid rgba(18, 18, 30, 0.06);
 }
@@ -229,7 +229,7 @@
   gap: 0.95rem;
   width: 100%;
   padding: 0.85rem 1rem;
-  border-radius: 1rem;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--filtercam-soft-border);
   background: rgba(18, 18, 30, 0.03);
   color: inherit;
@@ -246,7 +246,9 @@
 
 .filtercam-chip.is-active {
   border-color: var(--accent, #ff5f6d);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    var(--shadow-raised),
+    0 0 0 1px color-mix(in srgb, var(--accent, #ff5f6d) 35%, transparent);
   background: rgba(18, 18, 30, 0.05);
 }
 

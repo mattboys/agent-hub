@@ -13,7 +13,7 @@
 .card {
   position: relative;
   padding: clamp(18px, 3vw, 26px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: #ffffff;
   border: 1px solid var(--border-soft);
   box-shadow:
@@ -74,7 +74,7 @@
 
 .field textarea {
   min-height: clamp(210px, 28vh, 360px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: #f6f6f9;
   padding: 16px 18px;
@@ -117,7 +117,7 @@
 
 button.primary,
 button.ghost {
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   padding: 10px 16px;
   font-weight: 700;
   font-size: 0.95rem;
@@ -145,7 +145,7 @@ button.ghost:focus-visible {
   outline: none;
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--accent) 75%, rgba(255, 255, 255, 0.22));
-  box-shadow: 0 12px 20px rgba(9, 12, 22, 0.4);
+  box-shadow: var(--shadow-deep);
 }
 
 button.primary:disabled,
@@ -160,7 +160,7 @@ button.ghost:disabled {
   position: relative;
   z-index: 1;
   padding: clamp(18px, 3vw, 24px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: rgba(3, 5, 15, 0.88);
   text-align: center;
@@ -195,7 +195,7 @@ button.ghost:disabled {
 
 .bar {
   height: 10px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: rgba(18, 18, 30, 0.05);
   overflow: hidden;

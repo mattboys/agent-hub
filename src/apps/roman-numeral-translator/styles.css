@@ -26,7 +26,7 @@
   display: grid;
   gap: 18px;
   padding: clamp(20px, 3vw, 26px);
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: #ffffff;
   border: 1px solid var(--border-soft);
   box-shadow:
@@ -99,7 +99,7 @@
 }
 
 .field-input {
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: 1px solid var(--border-soft);
   background: rgba(7, 9, 18, 0.78);
   padding: 14px 16px;
@@ -131,12 +131,12 @@
   align-items: center;
   gap: 8px;
   padding: 12px 18px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   border: none;
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 75%, var(--border-soft)), color-mix(in srgb, var(--accent) 55%, rgba(0, 0, 0, 0.2)));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 75%, var(--border-soft)), color-mix(in srgb, var(--accent) 55%, rgba(18, 18, 30, 0.08)));
   color: rgba(17, 18, 26, 0.95);
   cursor: pointer;
   transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
@@ -153,7 +153,7 @@
 .field-error {
   margin: 0;
   padding: 10px 12px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   font-size: 0.88rem;
   line-height: 1.5;
   color: rgba(255, 225, 232, 0.92);
@@ -166,7 +166,7 @@
   display: grid;
   gap: 12px;
   padding: 18px 18px 16px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(18, 18, 30, 0.05);
   border: 1px solid var(--border-soft);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
@@ -229,7 +229,7 @@
   display: inline-flex;
   align-items: baseline;
   gap: 6px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   padding: 8px 12px;
   background: rgba(9, 12, 24, 0.78);
   border: 1px solid var(--border-soft);
@@ -267,7 +267,7 @@
   gap: 12px;
   align-items: center;
   padding: 12px 14px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(8, 11, 22, 0.76);
   border: 1px solid var(--border-soft);
 }
@@ -304,7 +304,7 @@
 .empty-state {
   margin: 0;
   padding: 12px 14px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(12, 14, 26, 0.65);
   border: 1px dashed rgba(255, 255, 255, 0.18);
   font-size: 0.9rem;
@@ -329,7 +329,7 @@
   display: grid;
   gap: 12px;
   padding: 14px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(8, 10, 20, 0.7);
   border: 1px solid var(--border-soft);
 }
@@ -354,7 +354,7 @@
   align-items: center;
   font-size: 0.95rem;
   padding: 8px 10px;
-  border-radius: 0;
+  border-radius: var(--radius, 6px);
   background: rgba(18, 18, 30, 0.05);
   border: 1px solid var(--border-soft);
 }
