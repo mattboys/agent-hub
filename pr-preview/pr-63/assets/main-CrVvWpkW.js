@@ -2,12 +2,11 @@ import"./modulepreload-polyfill-B5Qt9EMX.js";const n=[{slug:"apriltag-scout",tit
     <span class="hero-eyebrow">Matt Presents</span>
     <h1>Vibe-Coded App Hub</h1>
     <p>Micro web experiments with big feelings. Click any card to open a focused tool in a new page.</p>
-  `,e}function s(e){const t=document.createElement("a");return t.className="app-card",t.href=e.href,t.dataset.slug=e.slug,t.setAttribute("style",`--accent:${e.accent};`),t.setAttribute("aria-label",`${e.title}. ${e.blurb}`),t.innerHTML=`
+  `,e}function r(e){const t=document.createElement("a");return t.className="app-card",t.href=e.href,t.dataset.slug=e.slug,t.setAttribute("style",`--accent:${e.accent};`),t.setAttribute("aria-label",`${e.title}. ${e.blurb}`),t.innerHTML=`
     <span class="app-icon" aria-hidden="true">${e.icon}</span>
     <span class="app-title">${e.title}</span>
     <span class="app-blurb">${e.blurb}</span>
-    <span class="app-link" aria-hidden="true"></span>
-  `,t}function r(){const e=document.createElement("section");return e.className="app-grid",e.setAttribute("aria-label","Available vibe-coded applications"),n.forEach(t=>{e.appendChild(s(t))}),e}function o(){const e=document.createElement("section");return e.className="about",e.innerHTML=`
+  `,t}function s(){const e=document.createElement("section");return e.className="app-grid",e.setAttribute("aria-label","Available vibe-coded applications"),n.forEach(t=>{e.appendChild(r(t))}),e}function o(){const e=document.createElement("section");return e.className="about",e.innerHTML=`
     <div class="about-card">
       <h2>What is this place?</h2>
       <p>
@@ -48,4 +47,4 @@ import"./modulepreload-polyfill-B5Qt9EMX.js";const n=[{slug:"apriltag-scout",tit
           2min 15s — changes go live on <a href="https://mattboys.github.io/agent-hub/" target="_blank" rel="noopener noreferrer">GitHub Pages</a>.
         </p>
       </div>
-    `,e}function c(){if(!a)return;const e=document.createElement("div");e.className="page-shell",e.appendChild(i()),e.appendChild(r()),e.appendChild(l()),e.appendChild(o()),a.innerHTML="",a.appendChild(e)}c();
+    `,e}function c(){if(!a)return;const e=document.createElement("div");e.className="page-shell",e.appendChild(i()),e.appendChild(s()),e.appendChild(l()),e.appendChild(o()),a.innerHTML="",a.appendChild(e)}c();
