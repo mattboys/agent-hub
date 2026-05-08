@@ -112,18 +112,22 @@ body {
   padding: 12px 10px 12px;
   min-height: 0;
   border-radius: 0;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
+  background: color-mix(in srgb, var(--accent) 30%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, rgba(18, 18, 30, 0.12));
   text-decoration: none;
-  color: inherit;
+  color: var(--text-primary);
   overflow: hidden;
   box-shadow: var(--shadow-card);
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
 }
 
 .app-card:hover,
 .app-card:focus-visible {
-  border-color: color-mix(in srgb, var(--accent) 38%, var(--card-border));
+  background: color-mix(in srgb, var(--accent) 38%, #ffffff);
+  border-color: color-mix(in srgb, var(--accent) 58%, rgba(18, 18, 30, 0.14));
   box-shadow:
     var(--shadow-card-hover),
     0 0 0 1px color-mix(in srgb, var(--neon-cyan) 28%, transparent);
@@ -143,9 +147,9 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 0;
-  background: color-mix(in srgb, var(--accent) 14%, #ffffff);
-  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--card-border));
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
 }
 
 .app-title {
@@ -156,7 +160,7 @@ body {
 }
 
 .app-blurb {
-  color: var(--text-subtle);
+  color: rgba(20, 20, 26, 0.62);
   font-size: clamp(0.68rem, 2.2vw, 0.78rem);
   line-height: 1.35;
   display: -webkit-box;
@@ -173,13 +177,13 @@ body {
 .about-card {
   width: 100%;
   max-width: none;
-  padding: 10px 12px;
+  padding: 12px 14px 14px;
   border-radius: 0;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   box-shadow: var(--shadow-card);
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .about-card h2 {
@@ -204,30 +208,17 @@ body {
   font-size: 0.72rem;
 }
 
-.timeline {
-  display: flex;
-  justify-content: stretch;
-}
-
-.timeline-card {
-  width: 100%;
-  max-width: none;
-  padding: 10px 12px;
-  border-radius: 0;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--shadow-card);
-  display: grid;
-  gap: 8px;
-}
-
-.timeline-card h2 {
-  margin: 0;
+.about-subheading {
+  margin: 8px 0 0;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-subtle);
+}
+
+.about-card .timeline-steps {
+  margin: 4px 0 0;
 }
 
 .timeline-steps {
@@ -267,6 +258,10 @@ body {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
+}
+
+.about-card .timeline-total {
+  margin-top: 4px;
 }
 
 .timeline-total {
