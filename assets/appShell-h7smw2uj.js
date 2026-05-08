@@ -1,0 +1,6 @@
+function r({title:o,description:s,accent:c,status:p}){const e=document.getElementById("app");if(!e)throw new Error("Missing #app mount element");document.title=`${o} • Matt's Vibe Apps`,c&&document.documentElement.style.setProperty("--accent",c),e.innerHTML="",e.className="app-shell";const t=document.createElement("header");t.className="app-header";const a=document.createElement("a");a.href="../../",a.className="back-link",a.setAttribute("aria-label","Back to the hub"),a.innerHTML=`
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M14 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter"/>
+    </svg>
+    <span class="visually-hidden">Back to the hub</span>
+  `,t.appendChild(a);const i=document.createElement("h1");if(i.textContent=o,t.appendChild(i),s){const n=document.createElement("p");n.textContent=s,t.appendChild(n)}e.appendChild(t);const l=document.createElement("section");if(l.className="app-body",p){const n=document.createElement("span");n.className="status-pill",n.textContent=p,l.appendChild(n)}return e.appendChild(l),{body:l,mount:e,header:t}}export{r as c};
