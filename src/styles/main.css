@@ -91,18 +91,26 @@ body {
 
 .app-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+
+@media (min-width: 720px) {
+  .app-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
 }
 
 .app-card {
   position: relative;
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto 1fr;
   grid-template-columns: 1fr;
-  gap: 4px;
-  padding: 8px 8px 6px;
-  min-height: 128px;
+  align-content: start;
+  gap: 8px;
+  padding: 12px 10px 12px;
+  min-height: 0;
   border-radius: 0;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -127,10 +135,11 @@ body {
 }
 
 .app-icon {
-  font-size: 1.35rem;
+  font-size: clamp(1.75rem, 6vw, 2.25rem);
+  line-height: 1;
   display: inline-flex;
-  width: 36px;
-  height: 36px;
+  width: clamp(44px, 14vw, 56px);
+  height: clamp(44px, 14vw, 56px);
   align-items: center;
   justify-content: center;
   border-radius: 0;
@@ -141,42 +150,19 @@ body {
 
 .app-title {
   font-weight: 700;
-  font-size: 0.68rem;
-  line-height: 1.25;
+  font-size: clamp(0.78rem, 2.8vw, 0.95rem);
+  line-height: 1.2;
   letter-spacing: -0.02em;
 }
 
 .app-blurb {
   color: var(--text-subtle);
-  font-size: 0.58rem;
+  font-size: clamp(0.68rem, 2.2vw, 0.78rem);
   line-height: 1.35;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   overflow: hidden;
-}
-
-.app-link {
-  justify-self: end;
-  align-self: end;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  margin-top: 2px;
-  font-size: 0;
-  font-weight: 600;
-  color: color-mix(in srgb, var(--accent) 75%, var(--text-primary));
-  border: 1px solid var(--card-border);
-  background: color-mix(in srgb, var(--accent) 8%, #ffffff);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset;
-}
-
-.app-link::after {
-  content: '↗';
-  font-size: 0.85rem;
-  line-height: 1;
 }
 
 .about {
