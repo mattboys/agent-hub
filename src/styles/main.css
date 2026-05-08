@@ -164,10 +164,7 @@ body {
   color: rgba(20, 20, 26, 0.62);
   font-size: clamp(0.68rem, 2.2vw, 0.78rem);
   line-height: 1.35;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  overflow: hidden;
+  margin: 0;
 }
 
 .about {
